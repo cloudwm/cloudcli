@@ -1,1 +1,1 @@
-# cloudcli
+# cloudcli-server
