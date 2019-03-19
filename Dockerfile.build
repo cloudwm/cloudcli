@@ -1,0 +1,13 @@
+FROM golang:1.12
+
+ARG GOOS
+ARG GOARCH
+ENV GOOS ${GOOS}
+ENV GOARCH ${GOARCH}
+
+RUN go get -v github.com/spf13/cobra/cobra
+RUN go get -v github.com/go-resty/resty
+RUN go get -v gopkg.in/yaml.v2
+
+RUN mkdir -p /go/src/github.com/cloudwm/cli
+WORKDIR /go/src/github.com/cloudwm/cli
