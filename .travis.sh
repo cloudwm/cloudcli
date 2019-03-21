@@ -11,10 +11,10 @@ if [ "${1}" == "script" ]; then
     [ "$?" != "0" ] && echo Failed build && exit 1
     if [ "${GOOS}" == "linux" ] && [ "${GOARCH}" == "amd64" ]; then
         echo "Running tests for linux/amd64"
-        export DEBUG_OUTPUT_FILE=debug.log
+        # Debug output may contain sensitive details
+        export DEBUG_OUTPUT_FILE=/dev/null
         bash tests/test_all.sh
         RES="$?"
-        cat debug.log
         exit "${RES}"
     else
         echo Skipping tests for $GOOS/$GOARCH
