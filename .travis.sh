@@ -9,9 +9,9 @@ if [ "${1}" == "script" ]; then
     docker exec -it cloudwm-cli-build go build -o cloudcli main.go && sudo chown $USER ./cloudcli && sudo chmod +x ./cloudcli
     export PATH="`pwd`:${PATH}"
     [ "$?" != "0" ] && echo Failed build && exit 1
-    IMAGE="cloudwm/cloudcli-build-${GOOS}-${GOARCH}:${TRAVIS_COMMIT}"
+    IMAGE="cloudwm/cloudcli:${TRAVIS_COMMIT}-${GOOS}-${GOARCH}"
     echo Pushing build environment to Docker image ${IMAGE}
-    docker tag cloudcm-cli-build $IMAGE && docker push $IMAGE
+    docker tag cloudwm-cli-build $IMAGE && docker push $IMAGE
     if [ "${GOOS}" == "linux" ] && [ "${GOARCH}" == "amd64" ]; then
         echo "Running tests for linux/amd64"
         # Debug output may contain sensitive details
