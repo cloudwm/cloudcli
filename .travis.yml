@@ -15,15 +15,20 @@ env:
 services:
   - docker
 install:
+  - sudo apt-get install -y python3-pip && sudo python3 -m pip install yaml
   - curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/travis_ci_operator.sh > $HOME/bin/travis_ci_operator.sh
   - bash $HOME/bin/travis_ci_operator.sh init
   - travis_ci_operator.sh docker-login
-  - python3 -m pip install yaml
 script:
   - bash .travis.sh script
-#deploy:
-#  provider: script
-#  script: docker push org/image:latest
-#  on:
-#    branch: master
-#    condition: $TRAVIS_TAG = "" && $TRAVIS_PULL_REQUEST = "false"
+  - mkdir builds && mv cloudcli builds/cloudcli-$GOOS-$GOARCH
+deploy:
+  # See https://docs.travis-ci.com/user/deployment/releases/
+  provider: releases
+  api_key:
+    secure: "IismjCG8HUUIghVhjEHHRPyiSKbLiz80Dfn+4X7000icnxcJMWjYj2dNMeVXv1bAFcQON4GZTaXDJxcsnWXg5GDx837JkXocpOIMEMt1YjbRIIOY3xT9JR9gOUIPRgZu3Ck4rEhgLZZOY8LX8qoqglzw7IDSmqvx0hJXt0FX3Jl8nN39yM3py2F8vl9qPF7sTOHDla9P8nUjPvD0WzsXYvCYgrJsTFyMP1SLcwdzeUK1xUk1egQbEPUWqovgP8e94P6M7x84/GO0CnI1iXUjkvlKSh9wwMuzrCJoEvDcQSOCkWRbXc5sLAbV72Z42RugbIHf7KhXoQCv+csPsrkL/XQhWMfTGKA3NAWnu1bYvNFki1sV8TeyofMpUUPNs9uUj4hRQheSYwedxslNaQD4GKI9Jv9WanKQXUD+0PKhknPlVTtP5nmkdORHj327jrblmLaulIT8ULnrp0aSlNOqPDuJ2Y61UhCAJuAJcdJ+Y1dHFzTyNZP3uHuSIxvJ4DuSSR8DhytoyQ3uq0dhPWKIkrwcszoQxRW3VuJifUH+R/xWCYLF/qqT8zjNsBm8vWyqAurzwHBAlV+eWUao3LIag/268T3ltMPlBzoQUaNFnJnviQnvwsiKg0zrBtDF2BNeskdH/eRmZtzCk2VLtzH1iFh+k8SyJL28tf+SAhX2O1E="
+  file_glob: true # enables wildcards in file names
+  file: "builds/cloudcli-*"
+  skip_cleanup: true
+  on:
+    tags: true
