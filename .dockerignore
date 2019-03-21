@@ -1,5 +1,5 @@
 *.md
 Dockerfile*
-main
-main-*
+cloudcli
+cloudcli-*
 .*

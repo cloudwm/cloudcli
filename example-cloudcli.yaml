@@ -1,0 +1,17 @@
+# Most CLI flags can be set from the configuration file
+# Following are some examples with the corresponding flag
+
+# --api-server ""
+apiServer: https://server.example.com
+
+# --api-clientid ""
+apiClientid: example-client-id
+
+# --api-secret ""
+apiSecret: example-secret
+
+# --format "(yaml|json)"
+format: yaml
+
+# --debug
+debug: true

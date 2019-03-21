@@ -1,0 +1,34 @@
+language: bash
+sudo: required
+env:
+  matrix:
+    - GOOS=darwin GOARCH=386
+    - GOOS=darwin GOARCH=amd64
+    - GOOS=linux GOARCH=386
+    - GOOS=linux GOARCH=amd64
+    - GOOS=windows GOARCH=386
+    - GOOS=windows GOARCH=amd64
+  global:
+    - TRAVIS_CI_OPERATOR=1
+    - secure: "2lb908fqRlPZ48NcEP5/steszQMUfNBMVaeq7czlKXWh5n0afxVPwAYsrppeDfeJy4LdVwZ+uxtYrEnRqpmfYQLaGKdUh+rDzcZf0SHpZIIoFQP8aETVS134Mpn0bndc/HezqJ/idAHR1LKmL+eYYGcHD2So9l3oASdTy4n3PK5M+vcfSzMLGR3OdgUSENp5QEhqiPmhHf5guTRwkZ3DCT7u76AXlmlZ8T9Ds7V28MHjYolMrZeG3GMi0nA6+rzlCZNk4kqoz1iE78PbiqKP6qly6IfG+kd3T1SibadkDiIH2IVEPRnrRfleYNTZdCCEr9/zXjtLLcyb8jk461pOtZUjlOwAQnxFZbcPy2ptlGSJ6JsKDOT9xHh8hfNuAd9G0nCWHz8yvcSCW2eTpGwHfAECp3N70arEHlOmEicQg2rib0A5ybV9oif4pzY59Vg0Yoy5KiikFkIPqKO6ZcBWncjBVvYNS2OLQhD38Jl3TOMdF/sHyG2SjLXkigM/iWlXJbh6i7+hy4u18IESMsKLMiG6WpHdM3+HZqXV8ONWJfkK8nvu0iYlEbPgYwe+lWGaK++aJUO6lctzv5cJecygZZbxUlk4ChHpdojpte9R7LaNNKpLs2L+h2xSMlmXH4mGpCn2/xyzObWOqBmSrXUTFYIl43JcVT5QpB2/F5hkvtE="
+    - secure: "yBOPkxOL3baqbLv5SAc4q5nM4N6r51vqfxlH9L4vYiD/QTHc86GzWGbJzby4pCYoTLsrMrijqOYo3oc11mvROhtwyTnU/mfbtQIHyFWlGJFyq2wXYo2G8zPFKswiyYLGHNLK6P3q/ALD2vBXB5LbMCg81bOZrCMJ4/QiNYWefSuuSXZKVHL7Ca7+ZysCiTxWs/mEloYN1slX9sPs52ey12nU8z2O9pcAXnpAR2gH+vfpuqcqG4MXpqKUX7IL9NSBtV0nkUpt6s04BFDWqkAo3qOvjEtzMBEZDUIIj9OJvbF49N8JK0c2mgHsdlf6cbtn0Qz9U+hqqeQzqSWr6Uq65PFKhUquf3wrHaGY36pPVkmhH3XTx6xVVP9Hr4XMjeg4R+sB2EETsfn+yxhJYOBeb2suTnGqw14cVwdcSw0UMvW1SlndHLlwdfBXoZOkM6nUgQvQT59kkOaVdjrbjF0dGer8DD0VxEYxI0P6xBbcZ86vh8bHAS64PDNp3+e+BZW1Epc1ytO4zLSvR/2xj41qEqcSoQ5uamXuxXCfM8QrrqCAG6jxEWgUj5YALPayW6vMCQ+aYQRL5dyFbs8cDLh7TIFCvsYOSPWELkiqeaak8QopUyPxbXaZwLYXKcgZr4OIEMMX4H3OxLPq/ONEjS7A6r3Cja9Z2KXGOwW2EuKXfF4="
+services:
+  - docker
+install:
+  - sudo apt-get install -y python3-yaml
+  - curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/travis_ci_operator.sh > $HOME/bin/travis_ci_operator.sh
+  - bash $HOME/bin/travis_ci_operator.sh init
+  - travis_ci_operator.sh docker-login
+script:
+  - bash .travis.sh script
+  - mkdir builds && mv cloudcli builds/cloudcli-$GOOS-$GOARCH
+deploy:
+  # See https://docs.travis-ci.com/user/deployment/releases/
+  provider: releases
+  api_key:
+    secure: "IismjCG8HUUIghVhjEHHRPyiSKbLiz80Dfn+4X7000icnxcJMWjYj2dNMeVXv1bAFcQON4GZTaXDJxcsnWXg5GDx837JkXocpOIMEMt1YjbRIIOY3xT9JR9gOUIPRgZu3Ck4rEhgLZZOY8LX8qoqglzw7IDSmqvx0hJXt0FX3Jl8nN39yM3py2F8vl9qPF7sTOHDla9P8nUjPvD0WzsXYvCYgrJsTFyMP1SLcwdzeUK1xUk1egQbEPUWqovgP8e94P6M7x84/GO0CnI1iXUjkvlKSh9wwMuzrCJoEvDcQSOCkWRbXc5sLAbV72Z42RugbIHf7KhXoQCv+csPsrkL/XQhWMfTGKA3NAWnu1bYvNFki1sV8TeyofMpUUPNs9uUj4hRQheSYwedxslNaQD4GKI9Jv9WanKQXUD+0PKhknPlVTtP5nmkdORHj327jrblmLaulIT8ULnrp0aSlNOqPDuJ2Y61UhCAJuAJcdJ+Y1dHFzTyNZP3uHuSIxvJ4DuSSR8DhytoyQ3uq0dhPWKIkrwcszoQxRW3VuJifUH+R/xWCYLF/qqT8zjNsBm8vWyqAurzwHBAlV+eWUao3LIag/268T3ltMPlBzoQUaNFnJnviQnvwsiKg0zrBtDF2BNeskdH/eRmZtzCk2VLtzH1iFh+k8SyJL28tf+SAhX2O1E="
+  file_glob: true # enables wildcards in file names
+  file: "builds/cloudcli-*"
+  skip_cleanup: true
+  on:
+    tags: true
