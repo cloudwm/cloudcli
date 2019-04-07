@@ -39,6 +39,11 @@ const flagDebugKey = "debug"
 var debug bool
 var flagDebugValue bool
 
+const flagDryrun = "dryrun"
+const flagDryrunKey = "dryrun"
+var dryrun bool
+var flagDryrunValue bool
+
 func loadGlobalFlags() {
 	debug = viper.GetBool(flagDebugKey)
 	if debug {
@@ -74,7 +79,10 @@ func loadGlobalFlags() {
 	} else if debug {
 		fmt.Fprintf(os.Stderr, "%s = %s\n", flagFormatKey, format)
 	}
-
+	dryrun = viper.GetBool(flagDryrunKey)
+	if dryrun {
+		fmt.Fprintf(os.Stderr, "Running in dry run mode, not performing actions\n")
+	}
 	if numFailures > 0 {
 		os.Exit(1)
 	}
@@ -99,4 +107,7 @@ func addGlobalFlags() {
 
 	rootCmd.PersistentFlags().BoolVar(&flagDebugValue, flagDebug, false, "enable debug output to stderr")
 	viper.BindPFlag(flagDebugKey, rootCmd.PersistentFlags().Lookup(flagDebug))
+
+	rootCmd.PersistentFlags().BoolVar(&flagDryrunValue, flagDryrun, false, "enable dry run mode, does not perform actions")
+	viper.BindPFlag(flagDryrunKey, rootCmd.PersistentFlags().Lookup(flagDryrun))
 }

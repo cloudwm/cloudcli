@@ -44,3 +44,5 @@ func yamlDumpItemsList(respString string, items map[string]interface{}) {
 		fmt.Println(string(d))
 	}
 }
+
+

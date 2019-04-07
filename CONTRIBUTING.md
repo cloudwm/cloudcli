@@ -20,7 +20,9 @@ Build and run the Docker image which contains the build environment:
 ```
 ( docker rm -f cloudwm-cli-build || true ) &&\
 docker build --build-arg GOOS=$GOOS --build-arg GOARCH=$GOARCH -t cloudwm-cli-build -f Dockerfile.build . &&\
-docker run -d --rm --name cloudwm-cli-build -v `pwd`:/go/src/github.com/cloudwm/cli cloudwm-cli-build tail -f /dev/null
+docker run -d --rm --name cloudwm-cli-build -v `pwd`:/go/src/github.com/cloudwm/cli \
+           -v /etc/cloudcli:/etc/cloudcli \
+           cloudwm-cli-build tail -f /dev/null
 ```
 
 Compile and run the CLI:
@@ -28,6 +30,20 @@ Compile and run the CLI:
 ```
 docker exec -it cloudwm-cli-build go run main.go
 ```
+
+(Optional) Enable alpha commands and set a configuration file:
+
+```
+docker exec -e CLOUDCLI_CONFIG=/etc/cloudcli/.my-config.yaml -e CLOUDCLI_ENABLE_ALPHA=1 -it cloudwm-cli-build go run main.go
+```
+
+(Optional) For fast development iterations, define bash aliases:
+
+```
+alias cloudcli="docker exec -it cloudwm-cli-build go run main.go"
+alias cloudcli-build="docker exec -it cloudwm-cli-build go build -o cloudcli main.go && sudo chown $USER ./cloudcli && sudo chmod +x ./cloudcli"
+```
+
 
 Build a binary and set executable:
 
@@ -39,13 +55,6 @@ Run the executable (From Linux):
 
 ```
 ./cloudcli
-```
-
-(Optional) For fast development iterations, define bash aliases:
-
-```
-alias cloudcli="docker exec -it cloudwm-cli-build go run main.go"
-alias cloudcli-build="docker exec -it cloudwm-cli-build go build -o cloudcli main.go && sudo chown $USER ./cloudcli && sudo chmod +x ./cloudcli"
 ```
 
 ## Troubleshooting

@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"text/tabwriter"
@@ -14,7 +16,17 @@ import (
 
 func commandInit(cmd *cobra.Command, command SchemaCommand) {
 	for _, flag := range command.Flags {
-		cmd.Flags().StringP(flag.Name, "", "", flag.Usage)
+		if flag.Array {
+			var defaultValue []string
+			if flag.Default != "" {
+				defaultValue = append(defaultValue, flag.Default)
+			}
+			cmd.Flags().StringArrayP(flag.Name, "", defaultValue, flag.Usage)
+		} else if flag.Bool {
+			cmd.Flags().BoolP(flag.Name, "", flag.Default != "", flag.Usage)
+		} else {
+			cmd.Flags().StringP(flag.Name, "", flag.Default, flag.Usage)
+		}
 		if flag.Required {
 			cmd.MarkFlagRequired(flag.Name)
 		}
@@ -35,10 +47,14 @@ func commandRun(cmd *cobra.Command, command SchemaCommand) {
 }
 
 func commandRunGetList(cmd *cobra.Command, command SchemaCommand) {
-	if resp, err := resty.R().
+	get_url := fmt.Sprintf("%s%s", apiServer, command.Run.Path)
+	if dryrun {
+		fmt.Printf("\nGET %s\n", get_url)
+		os.Exit(exitCodeDryrun)
+	} else if resp, err := resty.R().
 		SetHeader("AuthClientId", apiClientid).
 		SetHeader("AuthSecret", apiSecret).
-		Get(fmt.Sprintf("%s%s", apiServer, command.Run.Path));
+		Get(get_url);
 		err != nil {
 		fmt.Println(err.Error())
 		os.Exit(exitCodeUnexpected)
@@ -90,9 +106,127 @@ func commandRunGetList(cmd *cobra.Command, command SchemaCommand) {
 	}
 }
 
+func commandExitErrorResponse(body []byte) {
+	var errorResponse map[string]interface{}
+	if err := json.Unmarshal(body, &errorResponse); err != nil {
+		fmt.Println(string(body))
+		fmt.Println("Failed to parse server error response")
+		os.Exit(exitCodeInvalidResponse)
+	} else {
+		var message string;
+		for k, v := range errorResponse {
+			if k == "message" {
+				message = v.(string);
+			}
+		}
+		if format == "" && message != "" {
+			fmt.Println(message)
+		} else {
+			var d []byte
+			var err error
+			if format == "yaml" {
+				d, err = yaml.Marshal(&errorResponse)
+			} else {
+				d, err = json.Marshal(&errorResponse)
+			}
+			if err != nil {
+				fmt.Println(string(body))
+				fmt.Println("Invalid response from server")
+				os.Exit(exitCodeInvalidResponse)
+			} else {
+				fmt.Println(string(d))
+			}
+		}
+		os.Exit(exitCodeInvalidStatus)
+	}
+}
+
 func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
-	fmt.Println("post")
-	os.Exit(exitCodeUnexpected)
+	var qs []string
+	for _, field := range command.Run.Fields {
+		var value string;
+		if field.Array {
+			arrayValue, _ := cmd.Flags().GetStringArray(field.Flag)
+			value = strings.Join(arrayValue, " ")
+		} else if field.Bool {
+			if boolValue, _ := cmd.Flags().GetBool(field.Flag); boolValue {
+				value = "true"
+			} else {
+				value = ""
+			}
+		} else {
+			value, _ = cmd.Flags().GetString(field.Flag)
+		}
+		escapedValue := url.PathEscape(value)
+		if (debug) {
+			fmt.Printf("\nfield %s=%s / urlpart %s=%s", field.Flag, value, field.Name, escapedValue)
+		}
+		qs = append(qs, fmt.Sprintf("%s=%s", field.Name, escapedValue))
+	}
+	payload := strings.Join(qs, "&")
+	post_url := fmt.Sprintf("%s%s", apiServer, command.Run.Path)
+	if dryrun {
+		fmt.Printf("\nPOST %s\n", post_url)
+		fmt.Printf("%s\n\n", payload)
+		os.Exit(exitCodeDryrun)
+	} else {
+		if req, err := http.NewRequest("POST", post_url, strings.NewReader(payload)); err != nil {
+			fmt.Println("Failed to create POST request")
+			os.Exit(exitCodeUnexpected)
+		} else {
+			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+			req.Header.Add("AuthClientId", apiClientid)
+			req.Header.Add("AuthSecret", apiSecret)
+			if r, err := http.DefaultClient.Do(req); err != nil {
+				fmt.Println("Failed to send POST request")
+				os.Exit(exitCodeUnexpected)
+			} else if body, err := ioutil.ReadAll(r.Body); err != nil {
+				fmt.Println("Failed to read POST response body")
+				os.Exit(exitCodeInvalidResponse)
+			} else if r.StatusCode != 200 {
+				commandExitErrorResponse(body)
+			} else {
+				var commandIds []string;
+				if err := json.Unmarshal(body, &commandIds); err != nil {
+					fmt.Println(string(body))
+					fmt.Println("Failed to parse response")
+					os.Exit(exitCodeInvalidResponse)
+				}
+				if len(commandIds) == 0 {
+					fmt.Println("Unexpected command failure")
+					os.Exit(exitCodeUnexpected);
+				}
+				if format == "json" || format == "yaml" {
+					parsedResponse := make(map[string][]string);
+					parsedResponse["command_ids"] = commandIds;
+					var d []byte
+					var err error
+					if format == "yaml" {
+						d, err = yaml.Marshal(&parsedResponse)
+					} else {
+						d, err = json.Marshal(&parsedResponse)
+					}
+					if err != nil {
+						fmt.Println(string(body))
+						fmt.Println("Invalid response from server")
+						os.Exit(exitCodeInvalidResponse)
+					} else {
+						fmt.Println(string(d))
+						os.Exit(0)
+					}
+				} else if len(commandIds) == 1 {
+					fmt.Printf("Command ID: %s\n", commandIds[0])
+					os.Exit(0)
+				} else {
+					fmt.Println("Command IDs:")
+					for _, commandId := range commandIds {
+						fmt.Printf("%s\n", commandId)
+					}
+					os.Exit(0)
+				}
+			}
+		}
+	}
 }
 
 func commandInitGetListOfLists(cmd *cobra.Command, command SchemaCommand) {

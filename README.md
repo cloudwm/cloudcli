@@ -11,7 +11,7 @@ sudo wget -O /usr/local/bin/cloudcli https://github.com/cloudwm/cloudcli/release
 sudo chmod +x /usr/local/bin/cloudcli
 ```
 
-## Usage
+## Configure
 
 Set server API host and credentials using one of the following options:
 
@@ -32,6 +32,15 @@ Set server API host and credentials using one of the following options:
 **Important** Please keep your server and API credentials secure, 
 it's recommended to use a configuration file with appropriate permissions and location.
 
+## Initialize / Update
+
+Update the CLI and authenticate with the API server
+
+```
+cloudcli init
+```
+
+Re-run the init command to get new features or bug fixes from the server.
 
 ## Commands
 
@@ -42,7 +51,6 @@ See the cloudcli command help messages for full reference.
 ```
 cloudcli --help
 ```
-
 
 ### Server commands
 
@@ -83,3 +91,7 @@ To enable them set environment variable `CLOUDCLI_ENABLE_ALPHA=1`
 Create server
 
 **Work In Progress**
+
+
+### Advanced Features
+
