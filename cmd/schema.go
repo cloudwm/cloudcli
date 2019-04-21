@@ -3,185 +3,14 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-resty/resty"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"io/ioutil"
 	"os"
 )
 
-var schemaJson = `{
-  "schema_version": [0, 0, 2],
-  "commands": [
-    {
-      "use": "server",
-      "short": "Server management",
-      "commands": [
-        {
-          "use": "list",
-          "short": "List servers",
-          "run": {
-            "cmd": "getList",
-            "path": "/service/servers",
-            "fields": [
-              {
-                "name": "id"
-              },
-              {
-                "name": "name"
-              },
-              {
-                "name": "datacenter"
-              },
-              {
-                "name": "power"
-              }
-            ]
-          }
-        },
-        {
-          "use": "options",
-          "short": "List server options",
-          "run": {
-            "cmd": "getListOfLists",
-            "path": "/service/server",
-            "lists": [
-              {
-                "name": "datacenter",
-                "key": "datacenters",
-                "type": "map",
-                "fields": [
-                  {
-                    "name": "datacenter",
-                    "from": "key"
-                  },
-                  {
-                    "name": "datacenter_description",
-                    "from": "value",
-                    "parsers": [
-                      {
-                        "parser": "split_value_remove_first",
-                        "split_string": ":"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "name": "cpu",
-                "key": "cpu",
-                "type": "list",
-                "fields": [
-                  {"name":  "cpu_type", "from":  "value"}
-                ]
-              },
-              {
-                "name": "ram",
-                "key": "ram",
-                "type": "list",
-                "fields": [
-                  {"name":  "ram_size_gb", "from":  "value"}
-                ]
-              },
-              {
-                "name": "disk",
-                "key": "disk",
-                "type": "list",
-                "fields": [
-                  {"name":  "disk_size_gb", "from":  "value"}
-                ]
-              },
-              {
-                "name": "image",
-                "key": "diskImages",
-                "type": "mapOfLists",
-                "fields": [
-                  {"name":  "image_id", "from":  "id"},
-                  {"name":  "image_name", "from":  "description"},
-                  {"name":  "image_size_gb", "from":  "sizeGB"},
-                  {"name":  "image_usage_info", "from":  "usageInfo", "long": true},
-                  {"name":  "image_guest_description", "from":  "guestDescription", "long": true},
-                  {"name":  "image_text_one", "from":  "freeTextOne", "long": true},
-                  {"name":  "image_text_two", "from":  "freeTextTwo", "long": true}
-                ]
-              },
-              {
-                "name": "traffic",
-                "key": "traffic",
-                "type": "mapOfLists",
-                "fields": [
-                  {"name":  "datacenter", "from":  "key"},
-                  {"name":  "traffic", "from":  "id"},
-                  {"name":  "traffic_info", "from":  "info"}
-                ]
-              },
-              {
-                "name": "network",
-                "key": "networks",
-                "type": "mapOfLists",
-                "fields": [
-                  {"name":  "datacenter", "from":  "key"},
-                  {"name":  "network", "from":  "name"},
-                  {
-                    "name":  "network_ips", "from":  "ips",
-                    "parsers": [
-                      {"parser": "network_ips", "only_for_humans":  true}
-                    ]
-                  }
-                ]
-              },
-              {
-                "name": "billing",
-                "key": "billing",
-                "type": "list",
-                "fields": [
-                  {"name":  "billing_plan", "from":  "value"}
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "alpha": true,
-          "use": "create",
-          "short": "Create a server",
-          "flags": [
-            {
-              "name": "name",
-              "usage": "Server name (a-zA-Z0-9()_-). (must be at least 4 characters long, mandatory)",
-              "required": true
-            },
-            {
-              "name": "datacenter",
-              "usage": "Server datacenter (EU, US-NY2, AS.. see --list-options). (mandatory)",
-              "required": true
-            },
-            {
-              "name": "image",
-              "usage": "Server image name or image ID (see --list-options). (mandatory)",
-              "required": true
-            }
-          ],
-          "run": {
-            "cmd": "post",
-            "path": "/service/server",
-            "fields": [
-              {
-                "name": "name",
-                "flag": "name"
-              },
-              {
-                "name": "datacenter",
-                "flag": "datacenter"
-              },
-              {
-                "name": "image",
-                "flag": "image"
-              }
-            ]
-          }
-        }
-      ]
-    }
-  ]
-}`
+var schemaFile string
 
 type SchemaCommandFieldParser struct {
 	Parser string `json:"parser"`
@@ -195,12 +24,17 @@ type SchemaCommandField struct {
 	From string `json:"from"`
 	Parsers []SchemaCommandFieldParser `json:"parsers"`
 	Long bool `json:"long"`
+	Array bool `json:"array"`
+	Bool bool `json:"bool"`
 }
 
 type SchemaCommandFlag struct {
 	Name string `json:"name"`
 	Usage string `json:"usage"`
 	Required bool `json:"required"`
+	Array bool `json:"array"`
+	Default string `json:"default"`
+	Bool bool `json:"bool"`
 }
 
 type SchemaCommandList struct {
@@ -232,25 +66,66 @@ type Schema struct {
 	Commands []SchemaCommand `json:"commands"`
 }
 
-func loadSchema() Schema {
-	var schema Schema
-	//if file, err := os.Open("schema.json"); err != nil {
-	//	fmt.Println(err)
-	//	fmt.Println("failed to open schema")
-	//	os.Exit(exitCodeUnexpected)
-	//} else {
-	//	defer file.Close()
-	//	if schemajson, err := ioutil.ReadAll(file); err != nil {
-	//		fmt.Println(err)
-	//		fmt.Println("Failed to read schema")
-	//		os.Exit(exitCodeUnexpected)
-	if err := json.Unmarshal([]byte(schemaJson), &schema); err != nil {
+func downloadSchema(schemaFile string, schemaUrl string) Schema {
+	var schema_ Schema
+	if dryrun || debug {
+		if debug {
+			fmt.Fprintf(os.Stderr, "\nAuthClientId: %s", apiClientid)
+			fmt.Fprintf(os.Stderr, "\nAuthSecret: %s", apiSecret)
+		}
+		fmt.Fprintf(os.Stderr, "\nGET %s\n", schemaUrl)
+	}
+	if dryrun {
+		os.Exit(exitCodeDryrun)
+	} else if resp, err := resty.R().
+		SetHeader("AuthClientId", apiClientid).
+		SetHeader("AuthSecret", apiSecret).
+		Get(schemaUrl); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(exitCodeUnexpected)
+	} else if resp.StatusCode() != 200 {
+		fmt.Println(resp.String())
+		os.Exit(exitCodeInvalidStatus)
+	} else if format == "json" {
+		fmt.Println(resp.String())
+		os.Exit(0)
+	} else if err := ioutil.WriteFile(schemaFile, []byte(resp.String()), 0644); err != nil {
+		fmt.Printf("Failed  to write schemaFile (%s)", schemaFile)
+		os.Exit(exitCodeUnexpected)
+	} else if err := json.Unmarshal([]byte(resp.String()), &schema_); err != nil {
 		fmt.Println(err)
 		fmt.Println("Invalid schema")
 		os.Exit(exitCodeUnexpected)
 	}
-	//}
-	return schema
+	return schema_
+}
+
+func loadSchema() (bool, Schema) {
+	var schema Schema
+	has_schema := false
+	if schemaFile = os.Getenv("CLOUDCLI_SCHEMA_FILE"); schemaFile == "" {
+		if home, err := homedir.Dir(); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		} else {
+			schemaFile = fmt.Sprintf("%s/%s", home, ".cloudcli.schema.json")
+		}
+	}
+	if file, err := os.Open(schemaFile); err == nil {
+		defer file.Close()
+		if schemaJsonString, err := ioutil.ReadAll(file); err != nil {
+			fmt.Println(err)
+			fmt.Println("Failed to read schema")
+			os.Remove(schemaFile)
+		} else if err := json.Unmarshal([]byte(schemaJsonString), &schema); err != nil {
+			fmt.Println(err)
+			fmt.Println("Invalid schema")
+			os.Remove(schemaFile)
+		} else {
+			has_schema = true
+		}
+	}
+	return has_schema, schema
 }
 
 func createCommandFromSchema(command SchemaCommand) *cobra.Command {
