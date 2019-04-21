@@ -16,6 +16,8 @@ echo '# Running all tests' | tee -a $DEBUG_OUTPUT_FILE
 echo '# Writing to debug file: '$DEBUG_OUTPUT_FILE
 
 echo "-----" &&\
+tests/test_init.sh &&\
+echo "-----" &&\
 tests/test_server_list.sh &&\
 echo "-----" &&\
 tests/test_server_options.sh &&\
