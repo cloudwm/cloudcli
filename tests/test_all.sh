@@ -15,13 +15,17 @@ echo '########################' >> $DEBUG_OUTPUT_FILE
 echo '# Running all tests' | tee -a $DEBUG_OUTPUT_FILE
 echo '# Writing to debug file: '$DEBUG_OUTPUT_FILE
 
+! which sshpass && sudo apt-get install -y sshpass
+! python3 -m pip install ruamel.yaml && echo failed to verify dependencies && exit 1
+
 echo "-----" &&\
 tests/test_init.sh &&\
 echo "-----" &&\
 tests/test_server_list.sh &&\
 echo "-----" &&\
 tests/test_server_options.sh &&\
-echo "-----"
+echo "-----" &&\
+python3 tests/test_server_create.py
 RES="$?"
 echo '########################' >> $DEBUG_OUTPUT_FILE
 echo End: `date` >> $DEBUG_OUTPUT_FILE

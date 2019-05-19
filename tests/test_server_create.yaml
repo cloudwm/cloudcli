@@ -1,0 +1,119 @@
+# all cloudcli server create flags can be used except the following which are generated:
+# --datacenter
+# --image
+# --name
+# --password
+# --poweronaftercreate
+
+- test-id: minimal
+  datacenter: IL
+  args: --image ubuntu_server_18.04_64-bit
+  expected_output_lines: |
+    Zone: IL
+    CPU: 1
+    RAM: 1024MB
+    Image Name: ubuntu_server_18.04_64-bit
+    Disk #1: 20GB
+    Network #1: wan-il
+    Daily Backup: No
+    Managed Hosting: No
+    Billing: Hourly
+  ssh:
+    user: root
+    hostname:
+      from-network: "Network #1: wan-il"
+  expected_server_commands:
+    - cmd: uname -sm
+      expected_output_lines: |
+        Linux x86_64
+
+- test-id: cpu-ram
+  datacenter: EU
+  args: --image ubuntu_server_18.04_64-bit --cpu 2B --ram 1024
+  expected_output_lines: |
+    Zone: EU
+    CPU: 2
+    RAM: 1024MB
+    Image Name: ubuntu_server_18.04_64-bit
+    Disk #1: 20GB
+    Network #1: wan-eu
+    Daily Backup: No
+    Managed Hosting: No
+    Billing: Hourly
+  ssh:
+    user: root
+    hostname:
+      from-network: "Network #1: wan-eu"
+  expected_server_commands:
+    - cmd: uname -sm
+      expected_output_lines: |
+        Linux x86_64
+
+- test-id: cpu-ram-2-disks-managed-backup-billing-monthlypackage
+  datacenter: IL-JR
+  args: --image ubuntu_server_18.04_64-bit --cpu 4B --ram 1024 --disk size=20 --disk size=10 --managed yes --dailybackup yes --billingcycle monthly --monthlypackage t5000
+  expected_output_lines: |
+    Zone: IL-JR
+    CPU: 4
+    RAM: 1024MB
+    Image Name: ubuntu_server_18.04_64-bit
+    Disk #1: 20GB
+    Disk #2: 10GB
+    Network #1: wan-il-jr
+    Daily Backup: Yes
+    Managed Hosting: Yes
+    Billing: Monthly
+    Traffic Package: 5000GB of traffic
+  ssh:
+    user: root
+    hostname:
+      from-network: "Network #1: wan-il-jr"
+  expected_server_commands:
+    - cmd: uname -sm
+      expected_output_lines: |
+        Linux x86_64
+
+- test-id: cpu-4D-4-disk-ids
+  datacenter: EU
+  args: --image ubuntu_server_18.04_64-bit --cpu 4D --disk id=3,size=20 --disk size=10 --disk id=0,size=30 --disk id=1,size=60
+  expected_output_lines: |
+    Zone: EU
+    CPU: 4 Dedicated
+    RAM: 1024MB
+    Image Name: ubuntu_server_18.04_64-bit
+    Disk #1: 30GB
+    Disk #2: 60GB
+    Disk #3: 10GB
+    Disk #4: 20GB
+    Network #1: wan-eu
+    Daily Backup: No
+    Managed Hosting: No
+    Billing: Hourly
+  ssh:
+    user: root
+    hostname:
+      from-network: "Network #1: wan-eu"
+  expected_server_commands:
+    - cmd: uname -sm
+      expected_output_lines: |
+        Linux x86_64
+
+# TODO: investigate and fix failure
+#   POST https://api.example.com/svc/serverCreate {"datacenter":"EU","nServers":1,"names":["test-2019-05-19-16-05-1558270940-1"],"cpuStr":"1B","ramMB":"1024","diskSizesGB":["20"],"password":"","passwordValidate":"","managed":false,"backup":false,"billingMode":1,"trafficPackage":"t5000","useSimpleNetworking":false,"powerOnCompletion":true,"useSimpleWan":false,"useSimpleLan":false,"netModes":["wan","lan","lan","lan"],"netNames":["wan","testnet4-gateway","testnet-2-no-gateway","testnet-3-dns"],"netSubnets":["","","",""],"netPrefixes":["","","",""],"netIps":["auto","10.0.0.60","auto","auto"],"diskImageId":"EU:6000C29a5a7220dcf84716e7bba74215","sourceServerId":"","userId":0,"ownerId":0,"srcUI":true}
+#- test-id: networks
+#  datacenter: EU
+#  args: --image ubuntu_server_18.04_64-bit --network id=2,name=testnet-2-no-gateway --network id=3,name=testnet-3-dns --network name=testnet4-gateway,ip=10.0.0.60 --network id=0,name=wan
+
+# TODO: investigate and fix failure
+# request to API from cloudcli-server:
+#   POST https://api.example.com/svc/serverCreate {"datacenter":"EU","nServers":1,"names":["test-2019-05-19-16-05-1558271816-1"],"cpuStr":"1B","ramMB":"1024","diskSizesGB":["20"],"password":"","passwordValidate":"","managed":false,"backup":false,"billingMode":1,"trafficPackage":"t5000","useSimpleNetworking":false,"powerOnCompletion":true,"useSimpleWan":false,"useSimpleLan":false,"netModes":["wan","lan"],"netNames":["wan","lan-82145-testnet-1"],"netSubnets":["",""],"netPrefixes":["",""],"netIps":["auto","auto"],"diskImageId":"EU:6000C29a5a7220dcf84716e7bba74215","sourceServerId":"","userId":0,"ownerId":0,"srcUI":true}
+#- test-id: networks-simpler
+#  datacenter: EU
+#  args: --image ubuntu_server_18.04_64-bit --network name=lan-82145-testnet4-gateway,ip=auto --network id=0,name=wan
+
+# TODO: investigate and fix failure
+# request to API from cloudcli-server:
+#   POST https://api.example.com/svc/serverCreate {"datacenter":"EU","nServers":1,"names":["test-2019-05-19-16-05-1558271816-1"],"cpuStr":"1B","ramMB":"1024","diskSizesGB":["20"],"password":"","passwordValidate":"","managed":false,"backup":false,"billingMode":1,"trafficPackage":"t5000","useSimpleNetworking":false,"powerOnCompletion":true,"useSimpleWan":false,"useSimpleLan":false,"netModes":["wan","lan"],"netNames":["wan","lan-82145-testnet-1"],"netSubnets":["",""],"netPrefixes":["",""],"netIps":["auto","auto"],"diskImageId":"EU:6000C29a5a7220dcf84716e7bba74215","sourceServerId":"","userId":0,"ownerId":0,"srcUI":true}
+#- test-id: networks-3
+#  datacenter: EU
+#  args: --image ubuntu_server_18.04_64-bit --network name=wan --network name=lan-82145-testnet-1
