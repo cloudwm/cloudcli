@@ -21,7 +21,7 @@ Build and run the Docker image which contains the build environment:
 ( docker rm -f cloudwm-cli-build || true ) &&\
 docker build --build-arg GOOS=$GOOS --build-arg GOARCH=$GOARCH -t cloudwm-cli-build -f Dockerfile.build . &&\
 docker run -d --rm --name cloudwm-cli-build -v `pwd`:/go/src/github.com/cloudwm/cli \
-           -v /etc/cloudcli:/etc/cloudcli \
+           -v /etc/cloudcli:/etc/cloudcli --network host \
            cloudwm-cli-build tail -f /dev/null
 ```
 
