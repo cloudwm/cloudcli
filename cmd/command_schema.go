@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
+	"time"
 )
 
 var schemaFile string
@@ -26,6 +27,14 @@ type SchemaCommandField struct {
 	Long bool `json:"long"`
 	Array bool `json:"array"`
 	Bool bool `json:"bool"`
+	Number bool `json:"number"`
+	Wait string `json:"wait"`
+	WaitPrintField string `json:"waitPrintField"`
+}
+
+type SchemaCommandFlagProcessing struct {
+	Method string `json:"method"`
+	Args interface{} `json:"args"`
 }
 
 type SchemaCommandFlag struct {
@@ -35,6 +44,7 @@ type SchemaCommandFlag struct {
 	Array bool `json:"array"`
 	Default string `json:"default"`
 	Bool bool `json:"bool"`
+	Processing []SchemaCommandFlagProcessing `json:"processing"`
 }
 
 type SchemaCommandList struct {
@@ -59,21 +69,25 @@ type SchemaCommand struct {
 	Run SchemaCommandRun `json:"run"`
 	Flags []SchemaCommandFlag `json:"flags"`
 	Commands []SchemaCommand `json:"commands"`
+	Wait bool `json:"wait"`
+	DefaultFormat string `json:"default-format"`
+	CacheFile string `json:"cache-file"`
 }
 
 type Schema struct {
 	SchemaVersion [3]int `json:"schema_version"`
 	Commands []SchemaCommand `json:"commands"`
+	SchemaGeneratedAt time.Time `json:"schema_generated_at"`
 }
 
 func downloadSchema(schemaFile string, schemaUrl string) Schema {
 	var schema_ Schema
 	if dryrun || debug {
 		if debug {
-			fmt.Fprintf(os.Stderr, "\nAuthClientId: %s", apiClientid)
-			fmt.Fprintf(os.Stderr, "\nAuthSecret: %s", apiSecret)
+			_, _ = fmt.Fprintf(os.Stderr, "\nAuthClientId: %s", apiClientid)
+			_, _ = fmt.Fprintf(os.Stderr, "\nAuthSecret: %s", apiSecret)
 		}
-		fmt.Fprintf(os.Stderr, "\nGET %s\n", schemaUrl)
+		_, _ = fmt.Fprintf(os.Stderr, "\nGET %s\n", schemaUrl)
 	}
 	if dryrun {
 		os.Exit(exitCodeDryrun)
@@ -116,12 +130,12 @@ func loadSchema() (bool, Schema) {
 		if schemaJsonString, err := ioutil.ReadAll(file); err != nil {
 			fmt.Println(err)
 			fmt.Println("Failed to read schema")
-			os.Remove(schemaFile)
+			_ = os.Remove(schemaFile)
 		} else if err := json.Unmarshal([]byte(schemaJsonString), &schema); err != nil {
 			fmt.Println(err)
 			fmt.Println("Invalid schema")
-			os.Remove(schemaFile)
-		} else {
+			_ = os.Remove(schemaFile)
+		} else if time.Since(schema.SchemaGeneratedAt).Minutes() < 60 {
 			has_schema = true
 		}
 	}
@@ -142,4 +156,13 @@ func createCommandFromSchema(command SchemaCommand) *cobra.Command {
 	}
 	commandInit(cmd, command)
 	return cmd
+}
+
+func getSchemaCommandFlag(command SchemaCommand, flagName string) SchemaCommandFlag {
+	for _, flag := range command.Flags {
+		if flagName == flag.Name {
+			return flag
+		}
+	}
+	return SchemaCommandFlag{}
 }

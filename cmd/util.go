@@ -46,3 +46,13 @@ func yamlDumpItemsList(respString string, items map[string]interface{}) {
 }
 
 
+func parseItemString(item interface{}) string {
+	var stringItem string
+	switch typeditem := item.(type) {
+	case float64:
+		stringItem = fmt.Sprintf("%d", int(typeditem))
+	default:
+		stringItem = fmt.Sprintf("%s", typeditem)
+	}
+	return stringItem
+}
