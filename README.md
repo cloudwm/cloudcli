@@ -11,87 +11,20 @@ sudo wget -O /usr/local/bin/cloudcli https://github.com/cloudwm/cloudcli/release
 sudo chmod +x /usr/local/bin/cloudcli
 ```
 
-## Configure
+## Documentation
 
-Set server API host and credentials using one of the following options:
+* [cloudcli](docs/cloudcli.md)	 - initial configuration and global options
 
-* **yaml configuration file**:
-    * A configuration file can set CLI flags 
-    * By default, a file is searched for at `$HOME/.cloudcli.yaml`
-    * A different location can be specified using env var `CLOUDCLI_CONFIG=""` or `--config` flag
-    * See [example-cloudcli.yaml](/example-cloudcli.yaml)
+#### Server management
 
-* **environment variables**:
-    * Environment variables prefixed with `CLOUDCLI_` can set CLI flags
-    * See [example-cloudcli.env](/example-cloudcli.env)
+* [cloudcli server create](docs/cloudcli_server_create.md)	 - Create a server
+* [cloudcli server list](docs/cloudcli_server_list.md)	 - List servers
+* [cloudcli server options](docs/cloudcli_server_options.md)	 - List server options
+* [cloudcli server poweroff](docs/cloudcli_server_poweroff.md)	 - Power Off server/s
+* [cloudcli server poweron](docs/cloudcli_server_poweron.md)	 - Power On server/s
+* [cloudcli server terminate](docs/cloudcli_server_terminate.md)	 - Terminate server/s
 
-* **CLI flags**:
-    * Server host and credentials can also be set using flags:
-    * `cloudcli --api-server "" --api-clientid "" --api-secret ""`
+#### Task queue management
 
-**Important** Please keep your server and API credentials secure, 
-it's recommended to use a configuration file with appropriate permissions and location.
-
-## Initialize / Update
-
-Update the CLI and authenticate with the API server
-
-```
-cloudcli init
-```
-
-Re-run the init command to get new features or bug fixes from the server.
-
-## Commands
-
-Following is an overview of main supported commands.
-
-See the cloudcli command help messages for full reference.
-
-```
-cloudcli --help
-```
-
-### Server commands
-
-
-#### `cloudcli server list`
-
-List all the servers in the account
-
-
-#### `cloudcli server options`
-
-Download and show the available server options for your account.
-
-One of the following flags must be provided:
-
-```
-  --billing      show billing resources
-  --cpu          show cpu resources
-  --datacenter   show datacenter resources
-  --disk         show disk resources
-  --image        show image resources
-  --network      show network resources
-  --ram          show ram resources
-  --traffic      show traffic resources
-```
-
-If optional flag `--cache` is provided, the options will be downloaded to local file `cloudcli-server-options.json` and loaded from that file if it exists.
-
-
-### Work in progress / Experiemental / Unstable commands
-
-Following commands are work in progress / experiemental / unstable
-
-To enable them set environment variable `CLOUDCLI_ENABLE_ALPHA=1`
-
-##### `cloudcli server create`
-
-Create server
-
-**Work In Progress**
-
-
-### Advanced Features
-
+* [cloudcli queue detail](docs/cloudcli_queue_detail.md)	 - Get details of tasks
+* [cloudcli queue list](docs/cloudcli_queue_list.md)	 - List all tasks in queue
