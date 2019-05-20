@@ -16,10 +16,7 @@ echo '# Running all tests' | tee -a $DEBUG_OUTPUT_FILE
 echo '# Writing to debug file: '$DEBUG_OUTPUT_FILE
 
 ! which sshpass && sudo apt-get install -y sshpass
-if ! sudo python3 -m pip -V && ! (wget -qO- https://bootstrap.pypa.io/get-pip.py | sudo python3); then
-    echo failed to install python3 or pip && exit 1
-fi
-! sudo python3 -m pip install ruamel.yaml && echo failed to verify dependencies && exit 1
+! sudo pip install ruamel.yaml && echo failed to verify dependencies && exit 1
 
 echo "-----" &&\
 tests/test_init.sh &&\
