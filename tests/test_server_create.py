@@ -54,6 +54,9 @@ def create_server(csv_report_writer, test):
         data = yaml.safe_load(output)
         if list(data.keys()) == ['command_ids'] and len(data['command_ids'])==1:
             command_id = data['command_ids'][0]
+    else:
+        test['create_failed_exitcode'] = exitcode
+        test['create_failed_output'] = output
     return command_id
 
 
@@ -156,7 +159,15 @@ def assert_running_with_various_flags_should_create_servers(context):
                 echo_ok("command id: {}".format(test['create_command_id']))
             else:
                 csv_report_writer.writerow(["create_failed", test['server_name'], test['datacenter']])
-                echo_failed("Failed to create server")
+                echo_failed("Failed to create server (exitcode={})".format(test.get('create_failed_exitcode')))
+                echo_info(test.get('create_failed_output'))
+        echo_info("waiting for create commands to complete")
+        for test in tests:
+            if test.get('create_command_id'):
+                echo_info("Waiting for server name {} (command id {})".format(test['server_name'], test['create_command_id']))
+                subprocess.call("cloudcli queue detail {} --id {} --wait".format(
+                    get_api_args(), test['create_command_id']
+                ), shell=True)
         echo_info("waiting for servers to be powered on", start_time=start_time)
         all_powered_on = False
         for i in range(1, 50):

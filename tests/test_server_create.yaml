@@ -98,22 +98,25 @@
       expected_output_lines: |
         Linux x86_64
 
-# TODO: investigate and fix failure
-#   POST https://api.example.com/svc/serverCreate {"datacenter":"EU","nServers":1,"names":["test-2019-05-19-16-05-1558270940-1"],"cpuStr":"1B","ramMB":"1024","diskSizesGB":["20"],"password":"","passwordValidate":"","managed":false,"backup":false,"billingMode":1,"trafficPackage":"t5000","useSimpleNetworking":false,"powerOnCompletion":true,"useSimpleWan":false,"useSimpleLan":false,"netModes":["wan","lan","lan","lan"],"netNames":["wan","testnet4-gateway","testnet-2-no-gateway","testnet-3-dns"],"netSubnets":["","","",""],"netPrefixes":["","","",""],"netIps":["auto","10.0.0.60","auto","auto"],"diskImageId":"EU:6000C29a5a7220dcf84716e7bba74215","sourceServerId":"","userId":0,"ownerId":0,"srcUI":true}
-#- test-id: networks
-#  datacenter: EU
-#  args: --image ubuntu_server_18.04_64-bit --network id=2,name=testnet-2-no-gateway --network id=3,name=testnet-3-dns --network name=testnet4-gateway,ip=10.0.0.60 --network id=0,name=wan
-
-# TODO: investigate and fix failure
-# request to API from cloudcli-server:
-#   POST https://api.example.com/svc/serverCreate {"datacenter":"EU","nServers":1,"names":["test-2019-05-19-16-05-1558271816-1"],"cpuStr":"1B","ramMB":"1024","diskSizesGB":["20"],"password":"","passwordValidate":"","managed":false,"backup":false,"billingMode":1,"trafficPackage":"t5000","useSimpleNetworking":false,"powerOnCompletion":true,"useSimpleWan":false,"useSimpleLan":false,"netModes":["wan","lan"],"netNames":["wan","lan-82145-testnet-1"],"netSubnets":["",""],"netPrefixes":["",""],"netIps":["auto","auto"],"diskImageId":"EU:6000C29a5a7220dcf84716e7bba74215","sourceServerId":"","userId":0,"ownerId":0,"srcUI":true}
-#- test-id: networks-simpler
-#  datacenter: EU
-#  args: --image ubuntu_server_18.04_64-bit --network name=lan-82145-testnet4-gateway,ip=auto --network id=0,name=wan
-
-# TODO: investigate and fix failure
-# request to API from cloudcli-server:
-#   POST https://api.example.com/svc/serverCreate {"datacenter":"EU","nServers":1,"names":["test-2019-05-19-16-05-1558271816-1"],"cpuStr":"1B","ramMB":"1024","diskSizesGB":["20"],"password":"","passwordValidate":"","managed":false,"backup":false,"billingMode":1,"trafficPackage":"t5000","useSimpleNetworking":false,"powerOnCompletion":true,"useSimpleWan":false,"useSimpleLan":false,"netModes":["wan","lan"],"netNames":["wan","lan-82145-testnet-1"],"netSubnets":["",""],"netPrefixes":["",""],"netIps":["auto","auto"],"diskImageId":"EU:6000C29a5a7220dcf84716e7bba74215","sourceServerId":"","userId":0,"ownerId":0,"srcUI":true}
-#- test-id: networks-3
-#  datacenter: EU
-#  args: --image ubuntu_server_18.04_64-bit --network name=wan --network name=lan-82145-testnet-1
+- test-id: networks
+  datacenter: EU
+  args: --image ubuntu_server_18.04_64-bit --network name=wan --network name=lan-82145-testnet4-gateway
+  # TODO: add the following line to the expected output lines - currently fails:
+  #   Network #2: testnet4-gateway
+  expected_output_lines: |
+    Zone: EU
+    CPU: 1
+    RAM: 1024MB
+    Image Name: ubuntu_server_18.04_64-bit
+    Disk #1: 20GB
+    Network #1: wan-eu
+    Daily Backup: No
+    Managed Hosting: No
+  ssh:
+    user: root
+    hostname:
+      from-network: "Network #1: wan-eu"
+  expected_server_commands:
+    - cmd: uname -sm
+      expected_output_lines: |
+        Linux x86_64

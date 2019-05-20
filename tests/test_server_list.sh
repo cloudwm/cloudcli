@@ -42,7 +42,7 @@ echo "### server list yaml should return yaml"
 OUT="$(cloudcli server list --format yaml --no-config --api-clientid "${TEST_API_CLIENTID}" --api-secret "${TEST_API_SECRET}" --api-server "${TEST_API_SERVER}")"
 [ "$?" != "0" ] && echo "${OUT}" && echo FAILED: exit code should be 0 && exit 1
 echo "${OUT}" | head -1 | grep -- '- ' >> $DEBUG_OUTPUT_FILE &&\
-echo "${OUT}" | python3 -c 'import yaml, sys; print(yaml.load(sys.stdin))' >> $DEBUG_OUTPUT_FILE
+echo "${OUT}" | python3 -c 'from ruamel import yaml; import sys; print(yaml.safe_load(sys.stdin))' >> $DEBUG_OUTPUT_FILE
 [ "$?" != "0" ] && echo "${OUT}" && echo FAILED: invalid yaml response && exit 1
 echo "## OK"
 

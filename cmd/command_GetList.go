@@ -67,7 +67,7 @@ func commandRunGetList(cmd *cobra.Command, command SchemaCommand, returnItems bo
 			waitValue, _ = cmd.Flags().GetBool("wait");
 		}
 		if waitValue {
-			return commandRunGetListWaitFields(cmd, command, waitFields, cmd_flags, outputFormat)
+			return commandRunGetListWaitFields(cmd, command, waitFields, cmd_flags, "human")
 		}
 	}
 	var items []interface{}

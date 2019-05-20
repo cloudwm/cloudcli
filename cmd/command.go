@@ -41,7 +41,7 @@ func commandRun(cmd *cobra.Command, command SchemaCommand) {
 					os.Exit(exitCodeInvalidFlags)
 				}
 				if b, _ := cmd.Flags().GetBool(flag.Name); b {
-					outputFormat := getCommandOutputFormat("", command, "")
+					outputFormat := getCommandOutputFormat("", command, "human")
 					ok := false
 					allowedOutputFormats := processing.Args.([]interface{})
 					for _, allowedFormat := range allowedOutputFormats {
