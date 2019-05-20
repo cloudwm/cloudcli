@@ -7,7 +7,7 @@ Terminal-based CLI interface for server and infrastructure management using supp
 Download binary for your OS/architecture from the [Releases](https://github.com/cloudwm/cloudcli/releases) page
 
 ```
-sudo wget -O /usr/local/bin/cloudcli https://github.com/cloudwm/cloudcli/releases/download/v0.0.2/cloudcli-linux-amd64 &&\
+sudo wget -O /usr/local/bin/cloudcli https://github.com/cloudwm/cloudcli/releases/download/v0.1.1/cloudcli-linux-amd64 &&\
 sudo chmod +x /usr/local/bin/cloudcli
 ```
 
