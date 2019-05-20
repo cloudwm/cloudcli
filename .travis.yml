@@ -1,4 +1,5 @@
-language: bash
+language: python
+python: 3.6
 sudo: required
 env:
   matrix:
