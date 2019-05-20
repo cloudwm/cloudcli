@@ -15,9 +15,6 @@ echo '########################' >> $DEBUG_OUTPUT_FILE
 echo '# Running all tests' | tee -a $DEBUG_OUTPUT_FILE
 echo '# Writing to debug file: '$DEBUG_OUTPUT_FILE
 
-! which sshpass && sudo apt-get install -y sshpass
-! sudo pip install ruamel.yaml && echo failed to verify dependencies && exit 1
-
 echo "-----" &&\
 tests/test_init.sh &&\
 echo "-----" &&\

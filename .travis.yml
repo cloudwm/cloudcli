@@ -16,10 +16,11 @@ env:
 services:
   - docker
 install:
-  - sudo apt-get install -y python3-yaml
   - curl -L https://raw.githubusercontent.com/OriHoch/travis-ci-operator/master/travis_ci_operator.sh > $HOME/bin/travis_ci_operator.sh
   - bash $HOME/bin/travis_ci_operator.sh init
   - travis_ci_operator.sh docker-login
+  - sudo apt-get install -y sshpass
+  - pip install ruamel.yaml
 script:
   - bash .travis.sh script
   - mkdir builds && mv cloudcli builds/cloudcli-$GOOS-$GOARCH
