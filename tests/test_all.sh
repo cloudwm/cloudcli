@@ -25,7 +25,7 @@ tests/test_server_list.sh &&\
 echo "-----" &&\
 tests/test_server_options.sh &&\
 echo "-----" &&\
-python3 tests/test_server_create.py
+python tests/test_server_create.py
 RES="$?"
 echo '########################' >> $DEBUG_OUTPUT_FILE
 echo End: `date` >> $DEBUG_OUTPUT_FILE
