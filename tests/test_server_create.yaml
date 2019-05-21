@@ -1,6 +1,5 @@
 # all cloudcli server create flags can be used except the following which are generated:
 # --datacenter
-# --image
 # --name
 # --password
 # --poweronaftercreate
