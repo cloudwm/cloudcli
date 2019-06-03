@@ -6,6 +6,8 @@ import (
 	"github.com/go-resty/resty"
 	"gopkg.in/yaml.v2"
 	"os"
+	"reflect"
+	"strings"
 )
 
 func getJsonHttpResponse(path string) *resty.Response {
@@ -51,8 +53,24 @@ func parseItemString(item interface{}) string {
 	switch typeditem := item.(type) {
 	case float64:
 		stringItem = fmt.Sprintf("%d", int(typeditem))
-	default:
+	case int:
+		stringItem = fmt.Sprintf("%d", typeditem)
+	case string:
 		stringItem = fmt.Sprintf("%s", typeditem)
+	case []interface {}:
+		var stringSubItems []string
+		for _, subitem := range typeditem {
+			stringSubItems = append(stringSubItems, parseItemString(subitem))
+		}
+		stringItem = strings.Join(stringSubItems, ", ")
+	case map[string]interface{}:
+		var stringSubItems []string
+		for k, v := range typeditem {
+			stringSubItems = append(stringSubItems, fmt.Sprintf("%s=%s", k, parseItemString(v)))
+		}
+		stringItem = fmt.Sprintf("{%s}", strings.Join(stringSubItems, ", "))
+	default:
+		stringItem = fmt.Sprintf("unknown type: %s", reflect.TypeOf(item))
 	}
 	return stringItem
 }

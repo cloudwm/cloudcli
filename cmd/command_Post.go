@@ -69,6 +69,11 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 				os.Exit(exitCodeInvalidResponse)
 			} else if r.StatusCode != 200 {
 				commandExitErrorResponse(body, command)
+			} else if command.Run.ServerMethod == "GET" {
+				returnGetCommandListResponse(
+					getCommandOutputFormat("", command, "human"),
+					false, body, command,
+				)
 			} else {
 				var commandIds []string;
 				if err := json.Unmarshal(body, &commandIds); err != nil {

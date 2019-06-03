@@ -12,6 +12,73 @@ import (
 	"text/tabwriter"
 )
 
+func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_body []byte, command SchemaCommand) []interface{} {
+	var items []interface{}
+	if outputFormat == "json" && ! returnItems {
+		fmt.Println(string(resp_body))
+		os.Exit(0)
+	} else {
+		if err := json.Unmarshal(resp_body, &items); err != nil {
+			fmt.Println(string(resp_body))
+			fmt.Println("Invalid response from server")
+			os.Exit(exitCodeInvalidResponse)
+		}
+		if ! returnItems {
+			var outputItems []map[string]string;
+			for _, item := range items {
+				inputItem := item.(map[string]interface{})
+				outputItem := make(map[string]string)
+				for _, field := range command.Run.Fields {
+					if inputItem[field.Name] != nil {
+						outputItem[field.Name] = parseItemString(inputItem[field.Name])
+					}
+				}
+				outputItems = append(outputItems, outputItem)
+			}
+			if len(outputItems) == 1 && len(outputItems[0]) == 1 {
+				for _, item := range outputItems {
+					for _, v := range item {
+						fmt.Println(v)
+						os.Exit(0)
+					}
+				}
+			}
+			if outputFormat == "yaml" {
+				if d, err := yaml.Marshal(&outputItems); err != nil {
+					fmt.Println(string(resp_body))
+					fmt.Println("Invalid response from server")
+					os.Exit(exitCodeInvalidResponse)
+				} else {
+					fmt.Println(string(d))
+					os.Exit(0)
+				}
+			} else {
+				w := tabwriter.NewWriter(
+					os.Stdout, 10, 0, 3, ' ',
+					0,
+				)
+				var header []string
+				for _, field := range command.Run.Fields {
+					if ! field.Long {
+						header = append(header, strings.ToUpper(field.Name))
+					}
+				}
+				_, _ = fmt.Fprintf(w, "%s\n", strings.Join(header, "\t"))
+				for _, outputItem := range outputItems {
+					var row []string
+					for _, field := range command.Run.Fields {
+						row = append(row, outputItem[field.Name])
+					}
+					_, _ = fmt.Fprintf(w, "%s\n", strings.Join(row, "\t"))
+				}
+				_ = w.Flush()
+				os.Exit(0)
+			}
+		}
+	}
+	return items
+}
+
 func commandRunGetList(cmd *cobra.Command, command SchemaCommand, returnItems bool, noWait bool, cmd_flags map[string]interface{}, outputFormat string) []interface{} {
 	var qs []string
 	var waitFields []SchemaCommandField
@@ -90,67 +157,8 @@ func commandRunGetList(cmd *cobra.Command, command SchemaCommand, returnItems bo
 	} else if resp.StatusCode() != 200 {
 		fmt.Println(resp.String())
 		os.Exit(exitCodeInvalidStatus)
-	} else if outputFormat == "json" && ! returnItems {
-		fmt.Println(resp.String())
-		os.Exit(0)
 	} else {
-		if err := json.Unmarshal(resp.Body(), &items); err != nil {
-			fmt.Println(resp.String())
-			fmt.Println("Invalid response from server")
-			os.Exit(exitCodeInvalidResponse)
-		}
-		if ! returnItems {
-			var outputItems []map[string]string;
-			for _, item := range items {
-				inputItem := item.(map[string]interface{})
-				outputItem := make(map[string]string)
-				for _, field := range command.Run.Fields {
-					if inputItem[field.Name] != nil {
-						outputItem[field.Name] = parseItemString(inputItem[field.Name])
-					}
-				}
-				outputItems = append(outputItems, outputItem)
-			}
-			if len(outputItems) == 1 && len(outputItems[0]) == 1 {
-				for _, item := range outputItems {
-					for _, v := range item {
-						fmt.Println(v)
-						os.Exit(0)
-					}
-				}
-			}
-			if outputFormat == "yaml" {
-				if d, err := yaml.Marshal(&outputItems); err != nil {
-					fmt.Println(resp.String())
-					fmt.Println("Invalid response from server")
-					os.Exit(exitCodeInvalidResponse)
-				} else {
-					fmt.Println(string(d))
-					os.Exit(0)
-				}
-			} else {
-				w := tabwriter.NewWriter(
-					os.Stdout, 10, 0, 3, ' ',
-					0,
-				)
-				var header []string
-				for _, field := range command.Run.Fields {
-					if ! field.Long {
-						header = append(header, strings.ToUpper(field.Name))
-					}
-				}
-				_, _ = fmt.Fprintf(w, "%s\n", strings.Join(header, "\t"))
-				for _, outputItem := range outputItems {
-					var row []string
-					for _, field := range command.Run.Fields {
-						row = append(row, outputItem[field.Name])
-					}
-					_, _ = fmt.Fprintf(w, "%s\n", strings.Join(row, "\t"))
-				}
-				_ = w.Flush()
-				os.Exit(0)
-			}
-		}
+		items = returnGetCommandListResponse(outputFormat, returnItems, resp.Body(), command)
 	}
 	return items
 }

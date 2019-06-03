@@ -60,6 +60,7 @@ type SchemaCommandRun struct {
 	Path string `json:"path"`
 	Fields []SchemaCommandField `json:"fields"`
 	Lists []SchemaCommandList `json:"lists"`
+	ServerMethod string `json:"serverMethod"`
 }
 
 type SchemaCommand struct {
