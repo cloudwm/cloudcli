@@ -8,47 +8,26 @@
 
 We use Docker for consistent build environment. You are welcome to inspect `Dockerfile.build` and replicate on a local host.
 
-Set env vars for desired OS (doesn't have to match your own OS)
+Create the cloudcli configuration at /etc/cloudcli/.cloudcli.yaml - 
+It's important to use this path as it's mounted inside the container.
+See example-cloudcli.yaml file in the project root. 
+
+Once the .cloudcli.yaml file is ready, you can build and start the build environment:
 
 ```
-export GOOS=linux
-export GOARCH=amd64
+bin/build.sh start_build_environment
 ```
 
-Build and run the Docker image which contains the build environment:
+Compile and run the CLI from inside the build environment container:
 
 ```
-( docker rm -f cloudwm-cli-build || true ) &&\
-docker build --build-arg GOOS=$GOOS --build-arg GOARCH=$GOARCH -t cloudwm-cli-build -f Dockerfile.build . &&\
-docker run -d --rm --name cloudwm-cli-build -v `pwd`:/go/src/github.com/cloudwm/cli \
-           -v /etc/cloudcli:/etc/cloudcli --network host \
-           cloudwm-cli-build tail -f /dev/null
+bin/build.sh run --config /etc/cloudcli/.cloudcli.yaml server list
 ```
 
-Compile and run the CLI:
+Build a binary so that it is available outside the container:
 
 ```
-docker exec -it cloudwm-cli-build go run main.go
-```
-
-(Optional) Enable alpha commands and set a configuration file:
-
-```
-docker exec -e CLOUDCLI_CONFIG=/etc/cloudcli/.my-config.yaml -e CLOUDCLI_ENABLE_ALPHA=1 -it cloudwm-cli-build go run main.go
-```
-
-(Optional) For fast development iterations, define bash aliases:
-
-```
-alias cloudcli="docker exec -it cloudwm-cli-build go run main.go"
-alias cloudcli-build="docker exec -it cloudwm-cli-build go build -o cloudcli main.go && sudo chown $USER ./cloudcli && sudo chmod +x ./cloudcli"
-```
-
-
-Build a binary and set executable:
-
-```
-docker exec -it cloudwm-cli-build go build -o cloudcli main.go && sudo chown $USER ./cloudcli && sudo chmod +x ./cloudcli
+bin/build.sh build
 ```
 
 Run the executable (From Linux):
@@ -57,41 +36,13 @@ Run the executable (From Linux):
 ./cloudcli
 ```
 
-## Troubleshooting
-
-If you encounter permission problems, try running the following from project path in local host:
-
-```
-sudo chown -R $USER .
-```
-
-Environment variables are not passed to the container by default. To test environment variables - you will have to modify the aliases or modify the exec script.
-
-
-## Cross Platform Building
-
-Build cross platform binaries for Windows, Mac and Linux:
-
-```
-for GOOS in darwin linux windows; do
-  for GOARCH in 386 amd64; do
-    echo "Building $GOOS-$GOARCH"
-    export GOOS=$GOOS
-    export GOARCH=$GOARCH
-    docker build --build-arg GOOS=$GOOS --build-arg GOARCH=amd64 -t cloudwm-cli-build-$GOOS-$GOARCH -f Dockerfile.build . &&\
-    docker run -it -v `pwd`:/go/src/github.com/cloudwm/cli cloudwm-cli-build-$GOOS-$GOARCH go build -o cloudcli-$GOOS-$GOARCH main.go
-  done
-done
-```
-
 
 ## Running the tests suite
 
-Compile the cloudcli binary and place in PATH
-
-Make sure environment is "clean" - e.g. no default cloudcli config files / env vars.
-
-Set environment variables for the API server and account to use for testing:
+* Compile the cloudcli binary and place in PATH
+* Make sure `python` version 3.6 binary is available in PATH
+* Make sure environment is "clean" - e.g. no default cloudcli config files / env vars.
+* Set environment variables for testing:
 
 ```
 TEST_API_SERVER=""
@@ -99,10 +50,16 @@ TEST_API_CLIENTID=""
 TEST_API_SECRET=""
 ```
 
-Run the tests suite:
+Verify the prerequisites
 
 ```
-tests/test_all.sh
+bin/test.sh verify
+```
+
+Run all tests:
+
+```
+bin/test.sh all
 ```
 
 ## Build Environments History
