@@ -2,13 +2,26 @@
 
 Terminal-based CLI interface for server and infrastructure management using supported APIs
 
+## Download
+
+Download the latest binary for your OS/architecture:
+
+**Windows**: [64 bit](https://cloudcli.cloudwm.com/binaries/latest/cloudcli-windows-amd64.zip) | [32 bit](https://cloudcli.cloudwm.com/binaries/latest/cloudcli-windows-386.zip)
+
+**Mac OS X**: [64 bit](https://cloudcli.cloudwm.com/binaries/latest/cloudcli-darwin-amd64.tar.gz) | [32 bit](https://cloudcli.cloudwm.com/binaries/latest/cloudcli-darwin-386.tar.gz)
+
+**Linux**: [64 bit](https://cloudcli.cloudwm.com/binaries/latest/cloudcli-linux-amd64.tar.gz) | [32 bit](https://cloudcli.cloudwm.com/binaries/latest/cloudcli-linux-386.tar.gz)
+
 ## Install
 
-Download binary for your OS/architecture from the [Releases](https://github.com/cloudwm/cloudcli/releases) page
+To install, extract the downloaded archive and place the binary in your PATH
+
+## Usage
+
+See the CLI help messages:
 
 ```
-sudo wget -O /usr/local/bin/cloudcli https://github.com/cloudwm/cloudcli/releases/download/v0.1.1/cloudcli-linux-amd64 &&\
-sudo chmod +x /usr/local/bin/cloudcli
+cloudcli --help
 ```
 
 ## Documentation
@@ -18,6 +31,7 @@ sudo chmod +x /usr/local/bin/cloudcli
 #### Server management
 
 * [cloudcli server create](docs/cloudcli_server_create.md)	 - Create a server
+* [cloudcli server info](docs/cloudcli_server_info.md)	 - Get server overview/information
 * [cloudcli server list](docs/cloudcli_server_list.md)	 - List servers
 * [cloudcli server options](docs/cloudcli_server_options.md)	 - List server options
 * [cloudcli server poweroff](docs/cloudcli_server_poweroff.md)	 - Power Off server/s
