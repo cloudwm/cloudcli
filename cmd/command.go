@@ -57,6 +57,18 @@ func commandRun(cmd *cobra.Command, command SchemaCommand) {
 			}
 		}
 	}
+	numErrors := 0
+	if apiClientid == "" {
+		fmt.Printf("ERROR: --%s flag is required\n", flagApiClientid)
+		numErrors += 1
+	}
+	if apiSecret == "" {
+		fmt.Printf("ERROR: --%s flag is required\n", flagApiSecret)
+		numErrors += 1
+	}
+	if numErrors > 0 {
+		os.Exit(exitCodeInvalidFlags)
+	}
 	if command.Run.Cmd == "getList" {
 		commandRunGetList(cmd, command, false, false, nil, "")
 	} else if command.Run.Cmd == "post" {

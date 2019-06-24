@@ -54,22 +54,15 @@ func loadGlobalFlags() {
 		}
 	}
 	numFailures := 0
-	if apiServer = strings.TrimSpace(viper.GetString(flagApiServerKey)); apiServer == "" {
-		numFailures += 1
-		fmt.Printf("ERROR: --%s flag is required\n", flagApiServer)
-	} else if debug {
+	apiServer = strings.TrimSpace(viper.GetString(flagApiServerKey))
+	apiClientid = strings.TrimSpace(viper.GetString(flagApiClientidKey))
+	apiSecret = strings.TrimSpace(viper.GetString(flagApiSecretKey))
+	if apiServer == "" {
+		apiServer = "https://cloudcli.cloudwm.com"
+	}
+	if debug {
 		_, _ = fmt.Fprintf(os.Stderr, "%s = %s\n", flagApiServerKey, apiServer)
-	}
-	if apiClientid = strings.TrimSpace(viper.GetString(flagApiClientidKey)); apiClientid == "" {
-		numFailures += 1
-		fmt.Printf("ERROR: --%s flag is required\n", flagApiClientid)
-	} else if debug {
 		_, _ = fmt.Fprintf(os.Stderr, "%s = %s\n", flagApiClientidKey, apiClientid)
-	}
-	if apiSecret = strings.TrimSpace(viper.GetString(flagApiSecretKey)); apiSecret == "" {
-		numFailures += 1
-		fmt.Printf("ERROR: --%s flag is required\n", flagApiSecret)
-	} else if debug {
 		_, _ = fmt.Fprintf(os.Stderr, "%s = %s\n", flagApiSecretKey, apiSecret)
 	}
 	format = strings.TrimSpace(viper.GetString(flagFormatKey))
