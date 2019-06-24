@@ -61,11 +61,3 @@ Run all tests:
 ```
 bin/test.sh all
 ```
-
-## Build Environments History
-
-Each build does fresh pulls of system dependencies and go modules.
-
-To revert or debug previous build environments, travis-ci pushed the build image to Docker Hub.
-
-The image tag is `cloudwm/cloudcli:{GIT_COMMIT_SHA}-{GOOS}-{GOARCH}` 
