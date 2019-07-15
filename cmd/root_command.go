@@ -2,9 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"os"
 	"strings"
 )
@@ -117,32 +115,5 @@ func initSubCommands() {
 			}
 		}
 		rootCmd.AddCommand(cmd)
-	}
-}
-
-func initConfig() {
-	if ! flagNoConfigValue {
-		if flagConfigValue != "" {
-			viper.SetConfigFile(flagConfigValue)
-		} else if os.Getenv("CLOUDCLI_CONFIG") != "" {
-			viper.SetConfigFile(os.Getenv("CLOUDCLI_CONFIG"))
-		} else {
-			home, err := homedir.Dir()
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-			viper.AddConfigPath(home)
-			viper.SetConfigName(cloudcliConfigFilePrefix)
-		}
-	}
-	viper.AutomaticEnv() // read in environment variables that match
-	viper.SetEnvPrefix(cloudcliEnvPrefix)
-	if flagNoConfigValue {
-		configFile = ""
-	} else if err := viper.ReadInConfig(); err != nil {
-		configFile = ""
-	} else {
-		configFile = viper.ConfigFileUsed()
 	}
 }

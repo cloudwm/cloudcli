@@ -14,6 +14,16 @@ func getInitCommand() *cobra.Command {
 		Long: "Authenticates to a cloudcli server and updates CLI to latest version",
 		Run: func(cmd *cobra.Command, args []string) {
 			schema := downloadSchema(schemaFile, fmt.Sprintf("%s%s", apiServer, "/schema"))
+			if apiClientid == "" && apiSecret == "" {
+				fmt.Printf("Performing interactive initialization of cloudcli\n")
+				apiClientid = getInput("Enter the API Client ID: ")
+				apiSecret = getInput("Enter the API Secret: ")
+				if apiClientid == "" || apiSecret == "" {
+					fmt.Println("Missing API client ID / Secret")
+					os.Exit(exitCodeUnexpected)
+				}
+				_ = writeNewConfigFile(fmt.Sprintf("apiServer: \"%s\"\napiClientid: \"%s\"\napiSecret: \"%s\"\n", apiServer, apiClientid, apiSecret))
+			}
 			fmt.Printf(
 				"cloudcli v%d.%d.%d Initialized successfully.\n\nYou can now run cloudcli commands, see:\ncloudcli --help\n\n",
 				schema.SchemaVersion[0], schema.SchemaVersion[1], schema.SchemaVersion[2],

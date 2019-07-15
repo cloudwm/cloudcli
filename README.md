@@ -14,7 +14,9 @@ Download the latest binary for your OS/architecture:
 
 ## Install
 
-To install, extract the downloaded archive and place the binary in your PATH
+Extract the downloaded archive and place the binary in your PATH.
+
+Run `cloudcli init` to perform an interactive initialization.
 
 ## Usage
 

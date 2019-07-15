@@ -43,7 +43,7 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 		}
 		escapedValue := url.PathEscape(value)
 		if (debug) {
-			fmt.Printf("\nfield %s=%s / urlpart %s=%s", field.Flag, value, field.Name, escapedValue)
+			fmt.Printf("field %s=%s / urlpart %s=%s\n", field.Flag, value, field.Name, escapedValue)
 		}
 		qs = append(qs, fmt.Sprintf("%s=%s", field.Name, escapedValue))
 	}

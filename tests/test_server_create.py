@@ -60,15 +60,15 @@ def create_server(csv_report_writer, test):
     return command_id
 
 
-def assert_running_without_cloudcli_credentials_should_fail(context):
-    exitcode, output = subprocess.getstatusoutput("cloudcli server create --no-config")
-    assert exitcode != 0
-    for line in [
-        'ERROR: --api-server flag is required',
-        'ERROR: --api-clientid flag is required',
-        'ERROR: --api-secret flag is required',
-    ]:
-        assert line in output
+# def assert_running_without_cloudcli_credentials_should_fail(context):
+#     exitcode, output = subprocess.getstatusoutput("cloudcli server create --no-config")
+#     assert exitcode != 0
+#     for line in [
+#         'ERROR: --api-server flag is required',
+#         'ERROR: --api-clientid flag is required',
+#         'ERROR: --api-secret flag is required',
+#     ]:
+#         assert line in output
 
 
 def assert_running_without_required_flags_should_fail(context):
@@ -217,7 +217,7 @@ def assert_running_with_various_flags_should_create_servers(context):
 def main(context):
     echo_title("cloudcli server create")
     for assertion in [
-        "assert_running_without_cloudcli_credentials_should_fail",
+        # "assert_running_without_cloudcli_credentials_should_fail",
         "assert_running_without_required_flags_should_fail",
         "assert_running_with_various_flags_should_create_servers"
     ]:

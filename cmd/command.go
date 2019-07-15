@@ -67,6 +67,7 @@ func commandRun(cmd *cobra.Command, command SchemaCommand) {
 		numErrors += 1
 	}
 	if numErrors > 0 {
+		fmt.Println("Provide the missing flags or run `cloudcli init` to initialize interactively")
 		os.Exit(exitCodeInvalidFlags)
 	}
 	if command.Run.Cmd == "getList" {

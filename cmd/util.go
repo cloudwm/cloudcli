@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty"
@@ -73,4 +74,15 @@ func parseItemString(item interface{}) string {
 		stringItem = fmt.Sprintf("unknown type: %s", reflect.TypeOf(item))
 	}
 	return stringItem
+}
+
+
+func getInput(title string) string {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print(title)
+	text, _ := reader.ReadString('\n')
+	text = strings.Replace(text, "\n", "", -1)
+	text = strings.Replace(text, "\r", "", -1)
+	text = strings.Replace(text, " ", "", -1)
+	return text
 }

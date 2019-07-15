@@ -7,10 +7,19 @@ else
 fi
 
 verify() {
-    if ! python --version | grep 3.6 >/dev/null 2>&1; then
+    local python_path="$(which python)"
+    local python_version="$(python --version)"
+    local cloudcli_path="$(which cloudcli)"
+    echo python_path=$python_path
+    echo python_version=$python_version
+    echo cloudcli_path=$cloudcli_path
+    echo test_api_server=$TEST_API_SERVER
+    if [ "${python_path}" == "" ]; then
+        echo Missing Python interpreter, make sure Python 3.6 is available as python in your PATH
+    elif ! echo $python_version | grep 3.6 >/dev/null 2>&1; then
         echo Invalid Python interpreter, make sure Python 3.6 is available as python in your PATH
         false
-    elif ! which cloudcli >/dev/null 2>&1; then
+    elif [ "${cloudcli_path}" == "" ]; then
         echo cloudcli binary must be in your PATH
         false
     elif [ -z "${TEST_API_SERVER}" ]; then
