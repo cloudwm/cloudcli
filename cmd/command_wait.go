@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"os"
 	"strings"
 	"time"
 )
@@ -13,8 +14,11 @@ func commandRunGetListWaitFields(cmd *cobra.Command, command SchemaCommand, wait
 	for {
 		items = commandRunGetList(cmd, command, true, true, cmd_flags, outputFormat)
 		var failed bool
-		failed, last_i = printItemsCommandsProgress(items, waitFields, outputFormat, last_i)
-		if failed {
+		var failedWithError bool
+		failed, last_i, failedWithError = printItemsCommandsProgress(items, waitFields, outputFormat, last_i)
+		if failedWithError {
+			os.Exit(exitCodeInvalidStatus)
+		} else if failed {
 			time.Sleep(5000000000)
 		} else {
 			break
@@ -23,18 +27,22 @@ func commandRunGetListWaitFields(cmd *cobra.Command, command SchemaCommand, wait
 	return commandRunGetList(cmd, command, false, true, cmd_flags, outputFormat)
 }
 
-func printItemsCommandsProgress(items []interface{}, waitFields []SchemaCommandField, outputFormat string, last_i int) (bool, int) {
+func printItemsCommandsProgress(items []interface{}, waitFields []SchemaCommandField, outputFormat string, last_i int) (bool, int, bool) {
 	failed := false
+	failedWithError := false
 	for _, item := range items {
 		for _, field := range waitFields {
 			fieldStatus := item.(map[string]interface{})[field.Name].(string)
 			if fieldStatus != field.Wait {
 				failed = true
 			}
+			if fieldStatus == field.WaitError {
+				failedWithError = true
+			}
 			last_i = printCommandProgress(items, field, outputFormat, item, last_i)
 		}
 	}
-	return failed, last_i
+	return failed, last_i, failedWithError
 }
 
 func printCommandProgress(items []interface{}, field SchemaCommandField, outputFormat string, item interface{}, last_i int) int {
