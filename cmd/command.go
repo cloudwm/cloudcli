@@ -7,6 +7,9 @@ import (
 )
 
 func commandInit(cmd *cobra.Command, command SchemaCommand) {
+	if command.DontSortFlags {
+		cmd.Flags().SortFlags = false
+	}
 	for _, flag := range command.Flags {
 		if flag.Name == "dryrun" {
 			// this flag is already added as a global flag

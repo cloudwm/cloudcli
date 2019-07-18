@@ -74,6 +74,7 @@ type SchemaCommand struct {
 	Wait bool `json:"wait"`
 	DefaultFormat string `json:"default-format"`
 	CacheFile string `json:"cache-file"`
+	DontSortFlags bool `json:"dont-sort-flags"`
 }
 
 type Schema struct {
