@@ -32,12 +32,14 @@ cloudcli --help
 
 #### Server management
 
+* [cloudcli server attach](docs/cloudcli_server_attach.md)	 - Connect to the server via SSH
 * [cloudcli server create](docs/cloudcli_server_create.md)	 - Create a server
 * [cloudcli server info](docs/cloudcli_server_info.md)	 - Get server overview/information
 * [cloudcli server list](docs/cloudcli_server_list.md)	 - List servers
 * [cloudcli server options](docs/cloudcli_server_options.md)	 - List server options
 * [cloudcli server poweroff](docs/cloudcli_server_poweroff.md)	 - Power Off server/s
 * [cloudcli server poweron](docs/cloudcli_server_poweron.md)	 - Power On server/s
+* [cloudcli server reboot](docs/cloudcli_server_reboot.md)	 - Reboot server/s
 * [cloudcli server terminate](docs/cloudcli_server_terminate.md)	 - Terminate server/s
 
 #### Task queue management

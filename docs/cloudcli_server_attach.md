@@ -1,22 +1,22 @@
-## cloudcli server poweron
+## cloudcli server attach
 
-Power On server/s
+Connect to the server via SSH
 
 ### Synopsis
 
-Power On server/s
+Connect to the server via SSH
 
 ```
-cloudcli server poweron [flags]
+cloudcli server attach [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help          help for poweron
-      --id string     Specific server UUID
-      --name string   Server name or regular expression matching multiple servers
-      --wait          Wait for command execution to finish only then exit cli.
+  -h, --help              help for attach
+      --id string         Specific server UUID
+      --name string       Server name or regular expression matching a single server
+      --password string   The server SSH password.
 ```
 
 ### Options inherited from parent commands

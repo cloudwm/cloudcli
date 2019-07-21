@@ -74,7 +74,7 @@ def create_server(csv_report_writer, test):
 def assert_running_without_required_flags_should_fail(context):
     exitcode, output = subprocess.getstatusoutput("cloudcli server create {}".format(get_api_args()))
     assert exitcode != 0
-    assert 'Error: required flag(s) "datacenter", "image", "name", "password" not set' in output
+    assert 'required flag(s) "name", "datacenter", "image", "password" not set' in output
 
 
 def assert_after_server_powered_on(tests):

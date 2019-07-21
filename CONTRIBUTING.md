@@ -61,3 +61,16 @@ Run all tests:
 ```
 bin/test.sh all
 ```
+
+
+## Updating the documentation
+
+Run the following from the project directory:
+
+```
+cloudcli init --docs-dir `pwd`/docs --docs-format markdown
+```
+
+Update README.md manually
+
+Commit the updated docs

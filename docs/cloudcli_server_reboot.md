@@ -1,19 +1,19 @@
-## cloudcli server poweron
+## cloudcli server reboot
 
-Power On server/s
+Reboot server/s
 
 ### Synopsis
 
-Power On server/s
+Reboot server/s
 
 ```
-cloudcli server poweron [flags]
+cloudcli server reboot [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help          help for poweron
+  -h, --help          help for reboot
       --id string     Specific server UUID
       --name string   Server name or regular expression matching multiple servers
       --wait          Wait for command execution to finish only then exit cli.
