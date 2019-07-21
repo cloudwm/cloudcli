@@ -74,6 +74,9 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 					getCommandOutputFormat("", command, "human"),
 					false, body, command,
 				)
+			} else if command.Run.Method == "sshServer" {
+				commandRunSsh(cmd, command, body)
+				os.Exit(exitCodeUnexpected)
 			} else {
 				var commandIds []string;
 				if err := json.Unmarshal(body, &commandIds); err != nil {
