@@ -3,3 +3,4 @@ Dockerfile*
 cloudcli
 cloudcli-*
 .*
+vendor

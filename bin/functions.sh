@@ -14,12 +14,17 @@ make_build_environment() {
   local go_arch="${2}"
   local docker_image="${3}"
   if docker pull "${docker_image}"; then
-    docker build --cache-from "${docker_image}" --build-arg GOOS="${go_os}" --build-arg GOARCH="${go_arch}" \
-                 -t "${docker_image}" -f ./Dockerfile.build .
+    docker build --build-arg GOOS="${go_os}" --build-arg GOARCH="${go_arch}" \
+                 -t "${docker_image}" -f ./Dockerfile.build \
+                 --cache-from "${docker_image}" \
+                 .
   else
-    docker build -t "${docker_image}" -f ./Dockerfile.build .
+    docker build --build-arg GOOS="${go_os}" --build-arg GOARCH="${go_arch}" \
+                 -t "${docker_image}"  -f ./Dockerfile.build \
+                 .
   fi &&\
-  docker push "${docker_image}"
+  docker push "${docker_image}" &&\
+  docker run --rm -v "`pwd`:/go/src/github.com/cloudwm/cli" "${docker_image}" dep ensure
 }
 
 get_binary_ext() {

@@ -1,3 +1,6 @@
 cloudcli
 cloudcli-*
 .idea
+python
+vendor
+cloudcli.exe

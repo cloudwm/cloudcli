@@ -5,11 +5,7 @@ ARG GOARCH
 ENV GOOS ${GOOS}
 ENV GOARCH ${GOARCH}
 
-RUN go get -v github.com/spf13/cobra/cobra
-RUN go get -v github.com/go-resty/resty
-RUN go get -v gopkg.in/yaml.v2
-RUN go get -v github.com/cpuguy83/go-md2man/md2man
-RUN go get -v golang.org/x/crypto/ssh
+RUN curl -f https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 RUN mkdir -p /go/src/github.com/cloudwm/cli
 WORKDIR /go/src/github.com/cloudwm/cli

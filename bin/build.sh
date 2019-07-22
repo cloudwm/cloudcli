@@ -17,7 +17,8 @@ start_build_environment() {
                  -f "${CLOUDCLI_PROJECT_PATH}/Dockerfile.build" "${CLOUDCLI_PROJECT_PATH}" &&\
     docker run -d --rm --name "${BUILD_CONTAINER_NAME}" -v "${CLOUDCLI_PROJECT_PATH}:/go/src/github.com/cloudwm/cli" \
                -v "${CLOUDCLI_ETC_PATH}:${CLOUDCLI_ETC_PATH}" --network host \
-               "${BUILD_CONTAINER_NAME}" tail -f /dev/null
+               "${BUILD_CONTAINER_NAME}" tail -f /dev/null &&\
+    docker exec -it "${BUILD_CONTAINER_NAME}" dep ensure
 }
 
 run() {
