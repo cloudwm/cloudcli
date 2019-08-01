@@ -18,6 +18,9 @@ type ServerIdsDryrunResponse struct {
 }
 
 func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
+	if b, _ := cmd.Flags().GetBool("interactive"); b && command.Interactive {
+		commandRunPostInteractive(cmd, command)
+	}
 	var qs []string
 	hasDryrunFlag := false
 	for _, field := range command.Run.Fields {

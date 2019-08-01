@@ -26,14 +26,14 @@ func commandInitGetListOfLists(cmd *cobra.Command, command SchemaCommand) {
 	}
 }
 
-func commandRunGetListOfLists(cmd *cobra.Command, command SchemaCommand) {
+func getListOfListsRespString(cacheFilePath string, enableCache bool, runPath string) string {
 	var respString = ""
 	var loadedFromCache = false
 	cache := false
-	if command.CacheFile != "" {
-		cache, _ = cmd.Flags().GetBool("cache")
+	if cacheFilePath != "" {
+		cache = enableCache
 		if cache {
-			if file, err := os.Open(command.CacheFile); err == nil {
+			if file, err := os.Open(cacheFilePath); err == nil {
 				defer file.Close()
 				if respBytes, err := ioutil.ReadAll(file); err == nil {
 					loadedFromCache = true
@@ -43,11 +43,17 @@ func commandRunGetListOfLists(cmd *cobra.Command, command SchemaCommand) {
 		}
 	}
 	if ! loadedFromCache || respString == "" {
-		respString = getJsonHttpResponse(command.Run.Path).String()
+		respString = getJsonHttpResponse(runPath).String()
 	}
 	if cache && ! loadedFromCache {
-		_ = ioutil.WriteFile(command.CacheFile, []byte(respString), 0444)
+		_ = ioutil.WriteFile(cacheFilePath, []byte(respString), 0444)
 	}
+	return respString
+}
+
+func commandRunGetListOfLists(cmd *cobra.Command, command SchemaCommand) {
+	enableCache, _ := cmd.Flags().GetBool("cache")
+	respString := getListOfListsRespString(command.CacheFile, enableCache, command.Run.Path)
 	onlyShow := ""
 	for _, list := range command.Run.Lists {
 		if b, err := cmd.Flags().GetBool(list.Name); err != nil {

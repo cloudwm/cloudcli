@@ -71,10 +71,10 @@ def create_server(csv_report_writer, test):
 #         assert line in output
 
 
-def assert_running_without_required_flags_should_fail(context):
-    exitcode, output = subprocess.getstatusoutput("cloudcli server create {}".format(get_api_args()))
-    assert exitcode != 0
-    assert 'required flag(s) "name", "datacenter", "image", "password" not set' in output
+# def assert_running_without_required_flags_should_fail(context):
+#     exitcode, output = subprocess.getstatusoutput("cloudcli server create {}".format(get_api_args()))
+#     assert exitcode != 0
+#     assert 'required flag(s) "name", "datacenter", "image", "password" not set' in output
 
 
 def assert_after_server_powered_on(tests):
@@ -218,7 +218,7 @@ def main(context):
     echo_title("cloudcli server create")
     for assertion in [
         # "assert_running_without_cloudcli_credentials_should_fail",
-        "assert_running_without_required_flags_should_fail",
+        # "assert_running_without_required_flags_should_fail",
         "assert_running_with_various_flags_should_create_servers"
     ]:
         echo_subtitle(assertion)

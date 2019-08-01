@@ -46,6 +46,10 @@ type SchemaCommandFlag struct {
 	Default string `json:"default"`
 	Bool bool `json:"bool"`
 	Processing []SchemaCommandFlagProcessing `json:"processing"`
+	ValidateRegex string `json:"validate-regex"`
+	LongName string `json:"long-name"`
+	SelectfromServeroption string `json:"selectfrom-serveroption"`
+	ValidatePassword bool `json:"validate-password"`
 }
 
 type SchemaCommandList struct {
@@ -77,6 +81,7 @@ type SchemaCommand struct {
 	DefaultFormat string `json:"default-format"`
 	CacheFile string `json:"cache-file"`
 	DontSortFlags bool `json:"dont-sort-flags"`
+	Interactive bool `json:"interactive"`
 }
 
 type Schema struct {

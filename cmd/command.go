@@ -26,9 +26,12 @@ func commandInit(cmd *cobra.Command, command SchemaCommand) {
 		} else {
 			cmd.Flags().StringP(flag.Name, "", flag.Default, flag.Usage)
 		}
-		if flag.Required {
-			_ = cmd.MarkFlagRequired(flag.Name)
-		}
+		// to support interactive mode - we conditionally set flags as required only if not in interactive mode
+		// check of required flag is done server-side
+		// TODO: determine a way to mark as required but also support server create --interactive
+		//if flag.Required {
+		//	_ = cmd.MarkFlagRequired(flag.Name)
+		//}
 	}
 	if command.Run.Cmd == "getListOfLists" {
 		commandInitGetListOfLists(cmd, command)
