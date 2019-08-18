@@ -50,6 +50,10 @@ type SchemaCommandFlag struct {
 	LongName string `json:"long-name"`
 	SelectfromServeroption string `json:"selectfrom-serveroption"`
 	ValidatePassword bool `json:"validate-password"`
+	ValidateBoolean bool `json:"validate-boolean"`
+	ValidateIntegerMin int `json:"validate-integer-min"`
+	ValidateIntegerMax int `json:"validate-integer-max"`
+	ValidateValues []string `json:"validate-values"`
 }
 
 type SchemaCommandList struct {

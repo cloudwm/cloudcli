@@ -26,6 +26,14 @@ func commandInitGetListOfLists(cmd *cobra.Command, command SchemaCommand) {
 	}
 }
 
+func refreshListOfListsCache(cacheFilePath string) {
+	if file, err := os.Open(cacheFilePath); err == nil {
+		file.Close()
+		_ = os.Remove(cacheFilePath)
+	}
+	_ = getListOfListsRespString(cacheFilePath, true, "/service/server")
+}
+
 func getListOfListsRespString(cacheFilePath string, enableCache bool, runPath string) string {
 	var respString = ""
 	var loadedFromCache = false

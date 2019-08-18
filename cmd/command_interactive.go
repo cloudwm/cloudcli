@@ -8,6 +8,7 @@ import (
 	"os"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -220,7 +221,7 @@ func getInteractiveFlagValue_Networks(reader *bufio.Reader, datacenter string) s
 		}
 		selectedNetworks = append(selectedNetworks, fmt.Sprintf("id=%d,name=%s,ip=%s", netId, selectedNetName, selectedNetIp))
 	}
-	return strings.Join(selectedNetworks, ";")
+	return strings.Join(selectedNetworks, " ")
 }
 
 func getInteractiveFlagValue_Disk(reader *bufio.Reader) string {
@@ -264,7 +265,43 @@ func getInteractiveFlagValue_Disk(reader *bufio.Reader) string {
 		if size == "" {break}
 		selectedSizes = append(selectedSizes, fmt.Sprintf("id=%d,size=%s", diskId, size))
 	}
-	return strings.Join(selectedSizes, ";")
+	return strings.Join(selectedSizes, " ")
+}
+
+func getInteractiveFlagValue_Traffic(reader *bufio.Reader, datacenter string) string {
+	respString := getListOfListsRespString("", false, "/svc?path=serverCreate/datacenterConfiguration/" + datacenter)
+	rootitems := jsonUnmarshalItemsList(respString)
+	var trafficPackageOptions []string
+	defaultTrafficPackage := ""
+	for rootlistkey, rootitem := range rootitems {
+		if rootlistkey == "trafficPackage" {
+			defaultTrafficPackage = rootitem.(string)
+		} else if rootlistkey == "trafficPackageConf" {
+			for _, opt := range rootitem.([]interface{}) {
+				trafficPackageOptions = append(trafficPackageOptions, opt.(string))
+			}
+		}
+	}
+	selectedTrafficOpt := ""
+	for true {
+		fmt.Printf("Enter a traffic option (%s) (default=%s): ", strings.Join(trafficPackageOptions, "|"), defaultTrafficPackage)
+		selectedTrafficOpt = readInput(reader)
+		if selectedTrafficOpt == "" {
+			selectedTrafficOpt = defaultTrafficPackage
+		}
+		ok := false
+		for _, opt := range trafficPackageOptions {
+			if selectedTrafficOpt == opt {
+				ok = true
+			}
+		}
+		if ok {
+			break
+		} else {
+			fmt.Printf("Invalid option. ")
+		}
+	}
+	return selectedTrafficOpt
 }
 
 func getInteractiveFlagValue_Image(reader *bufio.Reader, datacenter string) string {
@@ -351,6 +388,8 @@ func getInteractiveFlagValue(flag SchemaCommandFlag, reader *bufio.Reader, datac
 		return getInteractiveFlagValue_Disk(reader)
 	} else if flag.SelectfromServeroption == "network" {
 		return getInteractiveFlagValue_Networks(reader, datacenter)
+	} else if flag.SelectfromServeroption == "traffic" {
+		return getInteractiveFlagValue_Traffic(reader, datacenter)
 	} else {
 		fmt.Printf("%s: ", flag.Usage)
 		text := readInput(reader)
@@ -359,7 +398,7 @@ func getInteractiveFlagValue(flag SchemaCommandFlag, reader *bufio.Reader, datac
 			return getInteractiveFlagValue(flag, reader, datacenter, cpu)
 		}
 		if flag.ValidateRegex != "" {
-			if matched, err := regexp.MatchString(flag.ValidateRegex, text); err != nil || ! matched {
+			if matched, err := regexp.MatchString("^" + flag.ValidateRegex + "$", text); err != nil || ! matched {
 				fmt.Printf("%s must match regular expression: '%s'\n", getInteractiveFlagLongName(flag), flag.ValidateRegex)
 				return getInteractiveFlagValue(flag, reader, datacenter, cpu)
 			}
@@ -371,13 +410,45 @@ func getInteractiveFlagValue(flag SchemaCommandFlag, reader *bufio.Reader, datac
 					return getInteractiveFlagValue(flag, reader, datacenter, cpu)
 				}
 			}
-
+		}
+		if flag.ValidateBoolean {
+			if text != "yes" && text != "no" && text != "" {
+				fmt.Printf("Please enter 'yes' or 'no'. ")
+				return getInteractiveFlagValue(flag, reader, datacenter, cpu)
+			}
+		}
+		if flag.ValidateIntegerMin != 0  && text != "" {
+			if num, err := strconv.Atoi(text); err != nil || num < flag.ValidateIntegerMin {
+				fmt.Printf("%s must be at least %d. ", getInteractiveFlagLongName(flag), flag.ValidateIntegerMin)
+				return getInteractiveFlagValue(flag, reader, datacenter, cpu)
+			}
+		}
+		if flag.ValidateIntegerMax != 0  && text != "" {
+			if num, err := strconv.Atoi(text); err != nil || num > flag.ValidateIntegerMax {
+				fmt.Printf("%s must be less then or equal to %d. ", getInteractiveFlagLongName(flag), flag.ValidateIntegerMax)
+				return getInteractiveFlagValue(flag, reader, datacenter, cpu)
+			}
+		}
+		if len(flag.ValidateValues) > 0 && text != "" {
+			ok := false
+			for _, value := range flag.ValidateValues {
+				if text == value {
+					ok = true
+				}
+			}
+			if ! ok {
+				fmt.Printf("Invalid value for %s. ", getInteractiveFlagLongName(flag))
+				return getInteractiveFlagValue(flag, reader, datacenter, cpu)
+			}
 		}
 		return text
 	}
 }
 
 func commandRunPostInteractive(cmd *cobra.Command, command SchemaCommand) {
+	fmt.Printf("Fetching server options... ")
+	refreshListOfListsCache("cloudcli-server-options.json")
+	fmt.Printf("OK\n")
 	reader := bufio.NewReader(os.Stdin)
 	datacenter := ""
 	cpu := ""
