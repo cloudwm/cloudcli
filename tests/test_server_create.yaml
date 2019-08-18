@@ -26,6 +26,54 @@
       expected_output_lines: |
         Linux x86_64
 
+# TODO: implement this test
+#- test-id: minimal-interactive
+#  datacenter: IL
+#  interactive-script:
+#    - expect: Fetching server options...
+#    - expect: Server name
+#      send: "<SERVER_NAME>"
+#    - expect: Choose a datacenter
+#      send: "<DATACENTER>"
+#    - expect: Enter an image type
+#      send: ubuntu
+#    - expect: "Enter an image:"
+#      send: ubuntu_server_18.04_64-bit
+#    - send: ""
+#    - send: ""
+#    - send: ""
+#    - send: ""
+#    - send: ""
+#    - send: ""
+#    - send: ""
+#    - expect: Server password
+#      send: "<PASSWORD>"
+#    - send: ""
+#    - send: ""
+#    - send: ""
+#    - send: ""
+#    - send: ""
+#    - send: ""
+#  args: --interactive
+#  expected_output_lines: |
+#    Zone: IL
+#    CPU: 1
+#    RAM: 1024MB
+#    Image Name: ubuntu_server_18.04_64-bit
+#    Disk #1: 20GB
+#    Network #1: wan-il
+#    Daily Backup: No
+#    Managed Hosting: No
+#    Billing: Hourly
+#  ssh:
+#    user: root
+#    hostname:
+#      from-network: "Network #1: wan-il"
+#  expected_server_commands:
+#    - cmd: uname -sm
+#      expected_output_lines: |
+#        Linux x86_64
+
 - test-id: cpu-ram
   datacenter: EU
   args: --image ubuntu_server_18.04_64-bit --cpu 2B --ram 1024
