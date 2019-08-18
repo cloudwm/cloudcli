@@ -5,6 +5,10 @@
 DEBUG_OUTPUT_FILE=${DEBUG_OUTPUT_FILE:-/dev/null}
 
 echo "
+test SSH key
+" > ./test-ssh-key
+
+echo "
 ##### cloudcli init #####
 "
 

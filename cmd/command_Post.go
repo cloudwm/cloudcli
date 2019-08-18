@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 )
 
 type ServerIdsDryrunResponse struct {
@@ -20,6 +21,18 @@ type ServerIdsDryrunResponse struct {
 func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 	if b, _ := cmd.Flags().GetBool("interactive"); b && command.Interactive {
 		commandRunPostInteractive(cmd, command)
+	}
+	publicSshKeyFile, _ := cmd.Flags().GetString("ssh-key")
+	if publicSshKeyFile != "" {
+		if wait, _ := cmd.Flags().GetBool("wait"); ! wait {
+			fmt.Printf("--wait flag is required to set the SSH key after create\n")
+			os.Exit(exitCodeUnexpected)
+		}
+		_, err := ioutil.ReadFile(publicSshKeyFile)
+		if err != nil {
+			fmt.Printf("Failed to read public SSH key file: %s\n", publicSshKeyFile)
+			os.Exit(exitCodeUnexpected)
+		}
 	}
 	var qs []string
 	hasDryrunFlag := false
@@ -75,7 +88,7 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 			} else if command.Run.ServerMethod == "GET" {
 				returnGetCommandListResponse(
 					getCommandOutputFormat("", command, "human"),
-					false, body, command,
+					false, body, command, false,
 				)
 			} else if command.Run.Method == "sshServer" {
 				commandRunSsh(cmd, command, body, "")
@@ -147,14 +160,29 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 					}
 				} else if len(commandIds) == 1 {
 					fmt.Printf("Command ID: %s\n", commandIds[0])
-					waitForCommandIds(cmd, command, commandIds, getCommandOutputFormat("", command, "human"));
+					if publicSshKeyFile != "" {
+						serverName, _ := cmd.Flags().GetString("name")
+						serverPassword, _ := cmd.Flags().GetString("password")
+						waitForCommandIds(cmd, command, commandIds, getCommandOutputFormat("", command, "human"), true);
+						serverIp := getServerIP(serverName)
+						for ! setServerSshKey(serverPassword, serverIp, publicSshKeyFile) {
+							fmt.Printf("Retrying in 5 seconds...\n")
+							time.Sleep(5000000000)
+						}
+					} else {
+						waitForCommandIds(cmd, command, commandIds, getCommandOutputFormat("", command, "human"), false);
+					}
 					os.Exit(0)
 				} else {
 					fmt.Println("Command IDs:")
 					for _, commandId := range commandIds {
 						fmt.Printf("%s\n", commandId)
 					}
-					waitForCommandIds(cmd, command, commandIds, getCommandOutputFormat("", command, "human"))
+					waitForCommandIds(cmd, command, commandIds, getCommandOutputFormat("", command, "human"), false)
+					if publicSshKeyFile != "" {
+						fmt.Printf("Setting SSH key is not supported for multiple servers\n")
+						fmt.Printf("Please set manually, for each server, using server sshkey command\n")
+					}
 					os.Exit(0)
 				}
 			}

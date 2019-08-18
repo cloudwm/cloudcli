@@ -44,20 +44,28 @@ def get_elapsed_time_message(start_time=None):
 def create_server(csv_report_writer, test):
     echo_info("Creating server {} in datacenter {} with args: {}".format(test['server_name'], test['datacenter'], test['args']))
     csv_report_writer.writerow(["start_create", test['server_name'], test['datacenter'], "args=", test['args']])
+    if test.get('wait'):
+        testargs = test['args'] + " --wait"
+    else:
+        testargs = test['args'] + " --format yaml"
     exitcode, output = subprocess.getstatusoutput(
-        "cloudcli server create {} --format yaml --datacenter \"{}\" --name \"{}\" --password \"{}\" {}".format(
-            get_api_args(), test['datacenter'], test['server_name'], test['password'], test['args']
+        "cloudcli server create {} --datacenter \"{}\" --name \"{}\" --password \"{}\" {}".format(
+            get_api_args(), test['datacenter'], test['server_name'], test['password'], testargs
         )
     )
-    command_id = None
     if exitcode == 0:
-        data = yaml.safe_load(output)
-        if list(data.keys()) == ['command_ids'] and len(data['command_ids'])==1:
-            command_id = data['command_ids'][0]
+        if test.get('wait'):
+            return output
+        else:
+            data = yaml.safe_load(output)
+            if list(data.keys()) == ['command_ids'] and len(data['command_ids'])==1:
+                return data['command_ids'][0]
+            else:
+                return None
     else:
         test['create_failed_exitcode'] = exitcode
         test['create_failed_output'] = output
-    return command_id
+        return None
 
 
 # def assert_running_without_cloudcli_credentials_should_fail(context):
@@ -80,15 +88,18 @@ def create_server(csv_report_writer, test):
 def assert_after_server_powered_on(tests):
     all_have_expected_output_lines = True
     for test in tests:
-        test_create_log = test['create_log'] = None
-        if test.get('create_command_id'):
-            exitcode, output = subprocess.getstatusoutput("cloudcli queue detail {} --id {} --log".format(
-                get_api_args(), test['create_command_id']
-            ))
-            if exitcode == 0:
-                test_create_log = test['create_log'] = output
+        if test.get('wait'):
+            test_create_log = test['create_log']
         else:
             test_create_log = test['create_log'] = None
+            if test.get('create_command_id'):
+                exitcode, output = subprocess.getstatusoutput("cloudcli queue detail {} --id {} --log".format(
+                    get_api_args(), test['create_command_id']
+                ))
+                if exitcode == 0:
+                    test_create_log = test['create_log'] = output
+            else:
+                test_create_log = test['create_log'] = None
         if test.get('expected_output_lines'):
             if test_create_log:
                 for line in test['expected_output_lines'].splitlines():
@@ -153,14 +164,19 @@ def assert_running_with_various_flags_should_create_servers(context):
         for test_number, test in enumerate(tests, 1):
             test['server_name'] = "test-{}-{}".format(timestamp, test_number)
             test['password'] = 'Aa{}'.format(binascii.hexlify(os.urandom(6)).decode())
-            test['create_command_id'] = create_server(csv_report_writer, test)
-            if test['create_command_id']:
-                csv_report_writer.writerow(["create_success", test['server_name'], test['datacenter'], "create_command_id=", test['create_command_id']])
-                echo_ok("command id: {}".format(test['create_command_id']))
+            if test.get('wait'):
+                test['create_log'] = create_server(csv_report_writer, test)
+                test['create_command_id'] = None
             else:
-                csv_report_writer.writerow(["create_failed", test['server_name'], test['datacenter']])
-                echo_failed("Failed to create server (exitcode={})".format(test.get('create_failed_exitcode')))
-                echo_info(test.get('create_failed_output'))
+                test['create_log'] = None
+                test['create_command_id'] = create_server(csv_report_writer, test)
+                if test['create_command_id']:
+                    csv_report_writer.writerow(["create_success", test['server_name'], test['datacenter'], "create_command_id=", test['create_command_id']])
+                    echo_ok("command id: {}".format(test['create_command_id']))
+                else:
+                    csv_report_writer.writerow(["create_failed", test['server_name'], test['datacenter']])
+                    echo_failed("Failed to create server (exitcode={})".format(test.get('create_failed_exitcode')))
+                    echo_info(test.get('create_failed_output'))
         echo_info("waiting for create commands to complete")
         for test in tests:
             if test.get('create_command_id'):

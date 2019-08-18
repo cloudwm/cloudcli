@@ -26,6 +26,32 @@
       expected_output_lines: |
         Linux x86_64
 
+- test-id: minimal-ssh-key
+  datacenter: IL
+  wait: true
+  args: --image ubuntu_server_18.04_64-bit --ssh-key ./test-ssh-key
+  expected_output_lines: |
+    Zone: IL
+    CPU: 1
+    RAM: 1024MB
+    Image Name: ubuntu_server_18.04_64-bit
+    Disk #1: 20GB
+    Network #1: wan-il
+    Daily Backup: No
+    Managed Hosting: No
+    Billing: Hourly
+  ssh:
+    user: root
+    hostname:
+      from-network: "Network #1: wan-il"
+  expected_server_commands:
+    - cmd: uname -sm
+      expected_output_lines: |
+        Linux x86_64
+    - cmd: cat /root/.ssh/authorized_keys
+      expected_output_lines: |
+        test SSH key
+
 # TODO: implement this test
 #- test-id: minimal-interactive
 #  datacenter: IL

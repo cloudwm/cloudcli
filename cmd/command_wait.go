@@ -8,11 +8,11 @@ import (
 	"time"
 )
 
-func commandRunGetListWaitFields(cmd *cobra.Command, command SchemaCommand, waitFields []SchemaCommandField, cmd_flags map[string]interface{}, outputFormat string) []interface{} {
+func commandRunGetListWaitFields(cmd *cobra.Command, command SchemaCommand, waitFields []SchemaCommandField, cmd_flags map[string]interface{}, outputFormat string, noExit bool) []interface{} {
 	var items []interface{}
 	last_i := -1
 	for {
-		items = commandRunGetList(cmd, command, true, true, cmd_flags, outputFormat)
+		items = commandRunGetList(cmd, command, true, true, cmd_flags, outputFormat, false)
 		var failed bool
 		var failedWithError bool
 		failed, last_i, failedWithError = printItemsCommandsProgress(items, waitFields, outputFormat, last_i)
@@ -24,7 +24,7 @@ func commandRunGetListWaitFields(cmd *cobra.Command, command SchemaCommand, wait
 			break
 		}
 	}
-	return commandRunGetList(cmd, command, false, true, cmd_flags, outputFormat)
+	return commandRunGetList(cmd, command, false, true, cmd_flags, outputFormat, noExit)
 }
 
 func printItemsCommandsProgress(items []interface{}, waitFields []SchemaCommandField, outputFormat string, last_i int) (bool, int, bool) {
@@ -58,7 +58,7 @@ func printCommandProgress(items []interface{}, field SchemaCommandField, outputF
 }
 
 
-func waitForCommandIds(cmd *cobra.Command, command SchemaCommand, commandIds []string, outputFormat string) {
+func waitForCommandIds(cmd *cobra.Command, command SchemaCommand, commandIds []string, outputFormat string, noExit bool) {
 	if command.Wait {
 		if b, _ := cmd.Flags().GetBool("wait"); b {
 			fmt.Println("Waiting for commands to complete")
@@ -69,7 +69,7 @@ func waitForCommandIds(cmd *cobra.Command, command SchemaCommand, commandIds []s
 				cli_cobra_subcommands["queue.detail"],
 				cli_schema_subcommands["queue.detail"],
 				false, false,
-				cmd_flags, outputFormat,
+				cmd_flags, outputFormat, noExit,
 			)
 		}
 	}

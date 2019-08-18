@@ -77,7 +77,7 @@ func commandRun(cmd *cobra.Command, command SchemaCommand) {
 		os.Exit(exitCodeInvalidFlags)
 	}
 	if command.Run.Cmd == "getList" {
-		commandRunGetList(cmd, command, false, false, nil, "")
+		commandRunGetList(cmd, command, false, false, nil, "", false)
 	} else if command.Run.Cmd == "post" {
 		commandRunPost(cmd, command)
 	} else if command.Run.Cmd == "getListOfLists" {

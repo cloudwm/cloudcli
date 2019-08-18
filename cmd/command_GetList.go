@@ -12,11 +12,13 @@ import (
 	"text/tabwriter"
 )
 
-func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_body []byte, command SchemaCommand) []interface{} {
+func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_body []byte, command SchemaCommand, noExit bool) []interface{} {
 	var items []interface{}
 	if outputFormat == "json" && ! returnItems {
 		fmt.Println(string(resp_body))
-		os.Exit(0)
+		if ! noExit {
+			os.Exit(0)
+		}
 	} else {
 		if err := json.Unmarshal(resp_body, &items); err != nil {
 			fmt.Println(string(resp_body))
@@ -39,7 +41,9 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 				for _, item := range outputItems {
 					for _, v := range item {
 						fmt.Println(v)
-						os.Exit(0)
+						if ! noExit {
+							os.Exit(0)
+						}
 					}
 				}
 			}
@@ -50,7 +54,9 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 					os.Exit(exitCodeInvalidResponse)
 				} else {
 					fmt.Println(string(d))
-					os.Exit(0)
+					if ! noExit {
+						os.Exit(0)
+					}
 				}
 			} else {
 				w := tabwriter.NewWriter(
@@ -72,14 +78,16 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 					_, _ = fmt.Fprintf(w, "%s\n", strings.Join(row, "\t"))
 				}
 				_ = w.Flush()
-				os.Exit(0)
+				if ! noExit {
+					os.Exit(0)
+				}
 			}
 		}
 	}
 	return items
 }
 
-func commandRunGetList(cmd *cobra.Command, command SchemaCommand, returnItems bool, noWait bool, cmd_flags map[string]interface{}, outputFormat string) []interface{} {
+func commandRunGetList(cmd *cobra.Command, command SchemaCommand, returnItems bool, noWait bool, cmd_flags map[string]interface{}, outputFormat string, noExit bool) []interface{} {
 	var qs []string
 	var waitFields []SchemaCommandField
 	for _, field := range command.Run.Fields {
@@ -134,7 +142,7 @@ func commandRunGetList(cmd *cobra.Command, command SchemaCommand, returnItems bo
 			waitValue, _ = cmd.Flags().GetBool("wait");
 		}
 		if waitValue {
-			return commandRunGetListWaitFields(cmd, command, waitFields, cmd_flags, "human")
+			return commandRunGetListWaitFields(cmd, command, waitFields, cmd_flags, "human", noExit)
 		}
 	}
 	var items []interface{}
@@ -158,7 +166,7 @@ func commandRunGetList(cmd *cobra.Command, command SchemaCommand, returnItems bo
 		fmt.Println(resp.String())
 		os.Exit(exitCodeInvalidStatus)
 	} else {
-		items = returnGetCommandListResponse(outputFormat, returnItems, resp.Body(), command)
+		items = returnGetCommandListResponse(outputFormat, returnItems, resp.Body(), command, noExit)
 	}
 	return items
 }
