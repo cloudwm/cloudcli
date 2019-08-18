@@ -78,7 +78,15 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 					false, body, command,
 				)
 			} else if command.Run.Method == "sshServer" {
-				commandRunSsh(cmd, command, body)
+				commandRunSsh(cmd, command, body, "")
+				os.Exit(exitCodeUnexpected)
+			} else if command.Run.Method == "sshServerKey" {
+				publicKey, _ := cmd.Flags().GetString("public-key")
+				if publicKey == "" {
+					fmt.Printf("--public-key argument is required\n")
+					os.Exit(exitCodeUnexpected)
+				}
+				commandRunSsh(cmd, command, body, publicKey)
 				os.Exit(exitCodeUnexpected)
 			} else {
 				var commandIds []string;

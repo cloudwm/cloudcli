@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
+	"io/ioutil"
 	"os"
 )
 
@@ -13,7 +14,7 @@ type ServersSshInfo struct {
 	ExternalIp string `json:"externalIp"`
 }
 
-func commandRunSsh(cmd *cobra.Command, command SchemaCommand, serversInfoBody []byte) {
+func commandRunSsh(cmd *cobra.Command, command SchemaCommand, serversInfoBody []byte, publicKey string) {
 	var serversSshInfo []ServersSshInfo;
 	if err := json.Unmarshal(serversInfoBody, &serversSshInfo); err != nil {
 		fmt.Println(string(serversInfoBody))
@@ -45,33 +46,49 @@ func commandRunSsh(cmd *cobra.Command, command SchemaCommand, serversInfoBody []
 
 		session.Stdout = os.Stdout
 		session.Stderr = os.Stderr
-		session.Stdin = os.Stdin
 
-		modes := ssh.TerminalModes{
-			ssh.ECHO:          0,     // disable echoing
-		}
+		if publicKey == "" {
+			session.Stdin = os.Stdin
 
-		width, height, err := terminal.GetSize(int(os.Stdin.Fd()))
+			modes := ssh.TerminalModes{
+				ssh.ECHO: 0, // disable echoing
+			}
 
-		if err != nil {
-			fmt.Printf("Failed to initiate a terminal: %s\n", err)
-			os.Exit(exitCodeUnexpected)
-		}
+			width, height, err := terminal.GetSize(int(os.Stdin.Fd()))
 
-		if err := session.RequestPty("xterm", width, height, modes); err != nil {
-			fmt.Printf("request for pseudo terminal failed: %s", err)
-			os.Exit(exitCodeUnexpected)
-		}
+			if err != nil {
+				fmt.Printf("Failed to initiate a terminal: %s\n", err)
+				os.Exit(exitCodeUnexpected)
+			}
 
-		if err := session.Shell(); err != nil {
-			fmt.Printf("failed to start shell: %s", err)
-			os.Exit(exitCodeUnexpected)
-		}
+			if err := session.RequestPty("xterm", width, height, modes); err != nil {
+				fmt.Printf("request for pseudo terminal failed: %s", err)
+				os.Exit(exitCodeUnexpected)
+			}
 
-		if err = session.Wait(); err != nil {
-			fmt.Printf("%s\n", err)
-			os.Exit(exitCodeUnexpected)
+			if err := session.Shell(); err != nil {
+				fmt.Printf("failed to start shell: %s", err)
+				os.Exit(exitCodeUnexpected)
+			}
+
+			if err = session.Wait(); err != nil {
+				fmt.Printf("%s\n", err)
+				os.Exit(exitCodeUnexpected)
+			} else {
+				os.Exit(0)
+			}
 		} else {
+			publicKeyBytes, err := ioutil.ReadFile(publicKey)
+			if err != nil {
+				fmt.Printf("Failed to ready public key file\n")
+				os.Exit(exitCodeUnexpected)
+			}
+			err = session.Run(fmt.Sprintf("echo '%s' >> ~/.ssh/authorized_keys", string(publicKeyBytes)))
+			if err != nil {
+				fmt.Printf("Failed to add public key to authorized keys\n")
+				os.Exit(exitCodeUnexpected)
+			}
+			fmt.Printf("Successfuly added public key to authorized keys on the server\n")
 			os.Exit(0)
 		}
 	}
