@@ -89,9 +89,8 @@ def assert_after_server_powered_on(tests):
     all_have_expected_output_lines = True
     for test in tests:
         if test.get('wait'):
-            test_create_log = test['create_log']
+            test_create_log = test['create_log'] = test.get('create_log')
         else:
-            test_create_log = test['create_log'] = None
             if test.get('create_command_id'):
                 exitcode, output = subprocess.getstatusoutput("cloudcli queue detail {} --id {} --log".format(
                     get_api_args(), test['create_command_id']
@@ -167,6 +166,13 @@ def assert_running_with_various_flags_should_create_servers(context):
             if test.get('wait'):
                 test['create_log'] = create_server(csv_report_writer, test)
                 test['create_command_id'] = None
+                if test['create_log']:
+                    csv_report_writer.writerow(["create_success", test['server_name'], test['datacenter'], "create_log_length=", len(test['create_log'])])
+                    echo_ok("create_log:\n{}\n-----------\n".format(test['create_log']))
+                else:
+                    csv_report_writer.writerow(["create_failed", test['server_name'], test['datacenter']])
+                    echo_failed("Failed to create server (exitcode={})".format(test.get('create_failed_exitcode')))
+                    echo_info(test.get('create_failed_output'))
             else:
                 test['create_log'] = None
                 test['create_command_id'] = create_server(csv_report_writer, test)
@@ -197,7 +203,7 @@ def assert_running_with_various_flags_should_create_servers(context):
                 is_powered_on = test['powered on'] = exitcode == 0
                 if not was_powered_on and is_powered_on:
                     echo_ok("Server powered on successfully: {} in datacenter {}".format(test['server_name'], test['datacenter']), start_time=start_time)
-            all_powered_on = all([test['powered on'] for test in tests if test.get('create_command_id')])
+            all_powered_on = all([test['powered on'] for test in tests if (test.get('create_command_id') or test.get('create_log'))])
             if all_powered_on:
                 break
             echo_info("Sleeping 10 seconds ({}/50)".format(i), start_time=start_time)
