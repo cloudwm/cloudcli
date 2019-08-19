@@ -11,17 +11,27 @@ import (
 func commandRunGetListWaitFields(cmd *cobra.Command, command SchemaCommand, waitFields []SchemaCommandField, cmd_flags map[string]interface{}, outputFormat string, noExit bool) []interface{} {
 	var items []interface{}
 	last_i := -1
+	num_empty_responses := 0
 	for {
 		items = commandRunGetList(cmd, command, true, true, cmd_flags, outputFormat, false)
-		var failed bool
-		var failedWithError bool
-		failed, last_i, failedWithError = printItemsCommandsProgress(items, waitFields, outputFormat, last_i)
-		if failedWithError {
-			os.Exit(exitCodeInvalidStatus)
-		} else if failed {
-			time.Sleep(5000000000)
+		if len(items) < 1 {
+			if num_empty_responses > 10 {
+				fmt.Println("Failed to get command status")
+				os.Exit(exitCodeInvalidStatus)
+			}
+			time.Sleep(1000000000)
+			num_empty_responses++
 		} else {
-			break
+			var failed bool
+			var failedWithError bool
+			failed, last_i, failedWithError = printItemsCommandsProgress(items, waitFields, outputFormat, last_i)
+			if failedWithError {
+				os.Exit(exitCodeInvalidStatus)
+			} else if failed {
+				time.Sleep(5000000000)
+			} else {
+				break
+			}
 		}
 	}
 	return commandRunGetList(cmd, command, false, true, cmd_flags, outputFormat, noExit)

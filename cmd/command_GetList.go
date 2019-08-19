@@ -163,8 +163,12 @@ func commandRunGetList(cmd *cobra.Command, command SchemaCommand, returnItems bo
 		fmt.Println(err.Error())
 		os.Exit(exitCodeUnexpected)
 	} else if resp.StatusCode() != 200 {
-		fmt.Println(resp.String())
-		os.Exit(exitCodeInvalidStatus)
+		if returnItems {
+			return []interface{}{}
+		} else {
+			fmt.Println(resp.String())
+			os.Exit(exitCodeInvalidStatus)
+		}
 	} else {
 		items = returnGetCommandListResponse(outputFormat, returnItems, resp.Body(), command, noExit)
 	}
