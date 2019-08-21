@@ -391,7 +391,11 @@ func getInteractiveFlagValue(flag SchemaCommandFlag, reader *bufio.Reader, datac
 	} else if flag.SelectfromServeroption == "traffic" {
 		return getInteractiveFlagValue_Traffic(reader, datacenter)
 	} else {
-		fmt.Printf("%s: ", flag.Usage)
+		if flag.Name == "ssh-key" {
+			fmt.Printf("Absolute path to public key file, adds to server authorized keys after create is done: ")
+		} else {
+			fmt.Printf("%s: ", flag.Usage)
+		}
 		text := readInput(reader)
 		if flag.Required && text == "" {
 			fmt.Printf("%s is required, please enter a value\n", getInteractiveFlagLongName(flag))
