@@ -89,32 +89,63 @@ func setServerSshKey(serverPassword string, serverIp string, publicKey string) b
 }
 
 func commandRunSsh(cmd *cobra.Command, command SchemaCommand, serversInfoBody []byte, publicKey string) {
+	sshPassword, _ := cmd.Flags().GetString("password")
+	sshPrivateKey, _ := cmd.Flags().GetString("key")
+	if sshPassword != "" && sshPrivateKey != "" {
+		fmt.Println("Must use either --password or --key, but not both")
+		os.Exit(exitCodeInvalidFlags)
+	} else if sshPassword == "" && sshPrivateKey == "" {
+		fmt.Println("Must set either --password or --key")
+		os.Exit(exitCodeInvalidFlags)
+	}
 	var serversSshInfo []ServersSshInfo;
 	if err := json.Unmarshal(serversInfoBody, &serversSshInfo); err != nil {
 		fmt.Println(string(serversInfoBody))
 		fmt.Println("Failed to parse response")
 		os.Exit(exitCodeInvalidResponse)
 	} else {
-		sshPassword, _ := cmd.Flags().GetString("password")
+		var config ssh.ClientConfig
+		if sshPrivateKey != "" {
+			pkBytes, err := ioutil.ReadFile(sshPrivateKey)
+			if err != nil {
+				fmt.Printf("Failed to read private key file: %s\n", err.Error())
+				os.Exit(exitCodeUnexpected)
+			}
+			signer, err := ssh.ParsePrivateKey(pkBytes)
+			if err != nil {
+				fmt.Printf("Unable to parse private key: %s\n", err.Error())
+				os.Exit(exitCodeUnexpected)
+			}
+			config = ssh.ClientConfig{
+				User: "root",
+				Auth: []ssh.AuthMethod{
+					ssh.PublicKeys(signer),
+				},
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+			}
+		} else {
+			config = ssh.ClientConfig{
+				User: "root",
+				Auth: []ssh.AuthMethod{
+					ssh.Password(sshPassword),
+				},
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+			}
+		}
 		server := serversSshInfo[0].ExternalIp
 		port := "22"
 		server = server + ":" + port
-		config := &ssh.ClientConfig{
-			User: "root",
-			Auth: []ssh.AuthMethod{
-				ssh.Password(sshPassword),
-			},
-			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		}
-		conn, err := ssh.Dial("tcp", server, config)
+		conn, err := ssh.Dial("tcp", server, &config)
 		if err != nil {
-			panic("Failed to dial: " + err.Error())
+			fmt.Printf("Failed to connect to the server: %s\n", err.Error())
+			os.Exit(exitCodeInvalidResponse)
 		}
 		defer conn.Close()
 
 		session, err := conn.NewSession()
 		if err != nil {
-			panic("Failed to create session: " + err.Error())
+			fmt.Printf("Failed to initiate SSH session: %s\n", err.Error())
+			os.Exit(exitCodeInvalidResponse)
 		}
 		defer session.Close()
 
