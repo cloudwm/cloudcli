@@ -65,7 +65,7 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 				)
 				var header []string
 				for _, field := range command.Run.Fields {
-					if ! field.Long {
+					if ! field.Long && ! field.Hide {
 						header = append(header, strings.ToUpper(field.Name))
 					}
 				}
@@ -73,7 +73,9 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 				for _, outputItem := range outputItems {
 					var row []string
 					for _, field := range command.Run.Fields {
-						row = append(row, outputItem[field.Name])
+						if ! field.Hide {
+							row = append(row, outputItem[field.Name])
+						}
 					}
 					_, _ = fmt.Fprintf(w, "%s\n", strings.Join(row, "\t"))
 				}
