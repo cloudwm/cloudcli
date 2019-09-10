@@ -70,6 +70,12 @@ func parseItemString(item interface{}) string {
 			stringSubItems = append(stringSubItems, fmt.Sprintf("%s=%s", k, parseItemString(v)))
 		}
 		stringItem = fmt.Sprintf("{%s}", strings.Join(stringSubItems, ", "))
+	case bool:
+		if typeditem {
+			stringItem = "true"
+		} else {
+			stringItem = "false"
+		}
 	default:
 		stringItem = fmt.Sprintf("unknown type: %s", reflect.TypeOf(item))
 	}

@@ -71,7 +71,11 @@ func printCommandProgress(items []interface{}, field SchemaCommandField, outputF
 func waitForCommandIds(cmd *cobra.Command, command SchemaCommand, commandIds []string, outputFormat string, noExit bool) {
 	if command.Wait {
 		if b, _ := cmd.Flags().GetBool("wait"); b {
-			fmt.Println("Waiting for commands to complete")
+			s := ""
+			if len(commandIds) > 1 {
+				s = "s"
+			}
+			fmt.Printf("Waiting for command%s to complete\n", s)
 			cmd_flags := make(map[string]interface{})
 			cmd_flags["id"] = commandIds
 			cmd_flags["wait"] = true

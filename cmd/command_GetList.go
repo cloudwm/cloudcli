@@ -8,11 +8,12 @@ import (
 	"gopkg.in/yaml.v2"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 )
 
-func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_body []byte, command SchemaCommand, noExit bool) []interface{} {
+func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_body []byte, command SchemaCommand, noExit bool, cmd *cobra.Command) []interface{} {
 	var items []interface{}
 	if outputFormat == "json" && ! returnItems {
 		fmt.Println(string(resp_body))
@@ -21,9 +22,16 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 		}
 	} else {
 		if err := json.Unmarshal(resp_body, &items); err != nil {
-			fmt.Println(string(resp_body))
-			fmt.Println("Invalid response from server")
-			os.Exit(exitCodeInvalidResponse)
+			command_id, err := strconv.Atoi(string(resp_body))
+			if err == nil {
+				fmt.Println("Successfully queued command. Command ID:", command_id)
+				waitForCommandIds(cmd, command, []string{strconv.Itoa(command_id)}, getCommandOutputFormat("", command, "human"), false);
+				os.Exit(0)
+			} else {
+				fmt.Println(string(resp_body))
+				fmt.Println("Invalid response from server")
+				os.Exit(exitCodeInvalidResponse)
+			}
 		}
 		if ! returnItems {
 			var outputItems []map[string]string;
@@ -172,7 +180,7 @@ func commandRunGetList(cmd *cobra.Command, command SchemaCommand, returnItems bo
 			os.Exit(exitCodeInvalidStatus)
 		}
 	} else {
-		items = returnGetCommandListResponse(outputFormat, returnItems, resp.Body(), command, noExit)
+		items = returnGetCommandListResponse(outputFormat, returnItems, resp.Body(), command, noExit, cmd)
 	}
 	return items
 }

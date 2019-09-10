@@ -88,7 +88,7 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 			} else if command.Run.ServerMethod == "GET" {
 				returnGetCommandListResponse(
 					getCommandOutputFormat("", command, "human"),
-					false, body, command, false,
+					false, body, command, false, cmd,
 				)
 			} else if command.Run.Method == "sshServer" {
 				commandRunSsh(cmd, command, body, "")
