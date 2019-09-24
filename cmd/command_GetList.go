@@ -29,7 +29,6 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 				os.Exit(0)
 			} else {
 				fmt.Println(string(resp_body))
-				fmt.Println("Invalid response from server")
 				os.Exit(exitCodeInvalidResponse)
 			}
 		}
