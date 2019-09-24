@@ -1,23 +1,22 @@
-## cloudcli server passwordreset
+## cloudcli server description
 
-Reset server/s password
+Get or set server description
 
 ### Synopsis
 
-Reset server/s password
+Get or set server description
 
 ```
-cloudcli server passwordreset [flags]
+cloudcli server description [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help              help for passwordreset
-      --id string         Specific server UUID
-      --name string       Server name or regular expression matching multiple servers
-      --password string   The new password to set
-      --wait              Wait for command execution to finish only then exit cli.
+  -h, --help          help for description
+      --id string     Specific server UUID
+      --name string   Server name or regular expression matching a single server
+      --set string    Set server description to the given value
 ```
 
 ### Options inherited from parent commands

@@ -1,23 +1,28 @@
-## cloudcli server sshkey
+## cloudcli server network
 
-Add an SSH public key to the server authorized keys
+List/manage server networks
 
 ### Synopsis
 
-Add an SSH public key to the server authorized keys
+List/manage server networks
 
 ```
-cloudcli server sshkey [flags]
+cloudcli server network [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help                help for sshkey
+      --add string          Name of a new or existing VLAN interface to add to the server
+      --bits string         Required when using --add flag to create a new VLAN - Set the subnet bits of the network
+      --connect string      Mac address of a network to connect
+      --disconnect string   Mac address of a network to disconnect
+  -h, --help                help for network
       --id string           Specific server UUID
+      --ip string           Required when using --add flag - set the IP address of the added network interface
       --name string         Server name or regular expression matching a single server
-      --password string     The server SSH password.
-      --public-key string   Path to the public key file
+      --subnet string       Required when using --add flag to create a new VLAN - Set the subnet of the network.
+      --wait                Wait for command execution to finish only then exit cli.
 ```
 
 ### Options inherited from parent commands

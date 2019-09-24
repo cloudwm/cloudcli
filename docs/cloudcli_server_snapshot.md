@@ -1,23 +1,25 @@
-## cloudcli server passwordreset
+## cloudcli server snapshot
 
-Reset server/s password
+List/manage server snapshots
 
 ### Synopsis
 
-Reset server/s password
+List/manage server snapshots
 
 ```
-cloudcli server passwordreset [flags]
+cloudcli server snapshot [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help              help for passwordreset
-      --id string         Specific server UUID
-      --name string       Server name or regular expression matching multiple servers
-      --password string   The new password to set
-      --wait              Wait for command execution to finish only then exit cli.
+      --create string   Name of a new snapshot to create
+      --delete string   Snapshot ID to delete
+  -h, --help            help for snapshot
+      --id string       Specific server UUID
+      --name string     Server name or regular expression matching a single server
+      --revert string   Snaptshot ID to revert to
+      --wait            Wait for command execution to finish only then exit cli.
 ```
 
 ### Options inherited from parent commands

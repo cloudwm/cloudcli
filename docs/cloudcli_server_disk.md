@@ -1,23 +1,26 @@
-## cloudcli server passwordreset
+## cloudcli server disk
 
-Reset server/s password
+List/manage server disks
 
 ### Synopsis
 
-Reset server/s password
+List/manage server disks
 
 ```
-cloudcli server passwordreset [flags]
+cloudcli server disk [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help              help for passwordreset
-      --id string         Specific server UUID
-      --name string       Server name or regular expression matching multiple servers
-      --password string   The new password to set
-      --wait              Wait for command execution to finish only then exit cli.
+      --add string      Size in GB of new disk to add
+  -h, --help            help for disk
+      --id string       Specific server UUID
+      --name string     Server name or regular expression matching a single server
+      --remove string   ID of disk to remove
+      --resize string   ID of disk to resize, must set size flag as well for the new size
+      --size string     size in GB to resize the disk to, required only when using resize flag
+      --wait            Wait for command execution to finish only then exit cli.
 ```
 
 ### Options inherited from parent commands

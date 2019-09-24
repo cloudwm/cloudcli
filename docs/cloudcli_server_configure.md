@@ -1,23 +1,24 @@
-## cloudcli server passwordreset
+## cloudcli server configure
 
-Reset server/s password
+Change server configuration
 
 ### Synopsis
 
-Reset server/s password
+Change server configuration
 
 ```
-cloudcli server passwordreset [flags]
+cloudcli server configure [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help              help for passwordreset
-      --id string         Specific server UUID
-      --name string       Server name or regular expression matching multiple servers
-      --password string   The new password to set
-      --wait              Wait for command execution to finish only then exit cli.
+      --cpu string    CPU count and type (see server options)
+  -h, --help          help for configure
+      --id string     Specific server UUID
+      --name string   Server name or regular expression matching a single server
+      --ram string    Size of server ram in MiB (see server options)
+      --wait          Wait for command execution to finish only then exit cli.
 ```
 
 ### Options inherited from parent commands
