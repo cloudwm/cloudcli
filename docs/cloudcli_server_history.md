@@ -1,19 +1,21 @@
-## cloudcli server list
+## cloudcli server history
 
-List servers
+List server actions history
 
 ### Synopsis
 
-List servers
+List server actions history
 
 ```
-cloudcli server list [flags]
+cloudcli server history [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for list
+  -h, --help          help for history
+      --id string     Specific server UUID
+      --name string   Server name or regular expression matching a single server
 ```
 
 ### Options inherited from parent commands

@@ -1,19 +1,23 @@
-## cloudcli server list
+## cloudcli server rename
 
-List servers
+Rename server
 
 ### Synopsis
 
-List servers
+Rename server
 
 ```
-cloudcli server list [flags]
+cloudcli server rename [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for list
+  -h, --help              help for rename
+      --id string         Specific server UUID
+      --name string       Server name or regular expression matching a single server
+      --new-name string   The new name (a-zA-Z0-9()_-). (must be at least 4 characters long)
+      --wait              Wait for command execution to finish only then exit cli.
 ```
 
 ### Options inherited from parent commands
