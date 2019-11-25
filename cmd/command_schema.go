@@ -72,6 +72,7 @@ type SchemaCommandRun struct {
 	Fields []SchemaCommandField `json:"fields"`
 	Lists []SchemaCommandList `json:"lists"`
 	ServerMethod string `json:"serverMethod"`
+	ParseStatisticsResponse bool `json:"ParseStatisticsResponse"`
 }
 
 type SchemaCommand struct {

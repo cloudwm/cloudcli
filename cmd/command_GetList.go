@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
+	"time"
 )
 
 func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_body []byte, command SchemaCommand, noExit bool, cmd *cobra.Command) []interface{} {
@@ -34,22 +35,44 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 		}
 		if ! returnItems {
 			var outputItems []map[string]string;
-			for _, item := range items {
-				inputItem := item.(map[string]interface{})
-				outputItem := make(map[string]string)
-				for _, field := range command.Run.Fields {
-					if inputItem[field.Name] != nil {
-						outputItem[field.Name] = parseItemString(inputItem[field.Name])
+			if command.Run.ParseStatisticsResponse {
+				var metric string;
+				var value string;
+				var timestamp int64;
+				for _, response := range items {
+					for _, subResponse := range response.([]interface{}) {
+						seriesResponse := subResponse.(map[string]interface{})
+						metric = seriesResponse["series"].(string)
+						for _, data := range seriesResponse["data"].([]interface{}) {
+							dataItems := data.([]interface{})
+							timestamp = int64(dataItems[0].(float64))
+							value = parseItemString(dataItems[1])
+							outputItem := make(map[string]string)
+							outputItem["metric"] = metric
+							outputItem["date"] = time.Unix(timestamp/1000, 0).Format("2006-01-02 15:04:05")
+							outputItem["value"] = value
+							outputItems = append(outputItems, outputItem)
+						}
 					}
 				}
-				outputItems = append(outputItems, outputItem)
-			}
-			if len(outputItems) == 1 && len(outputItems[0]) == 1 {
-				for _, item := range outputItems {
-					for _, v := range item {
-						fmt.Println(v)
-						if ! noExit {
-							os.Exit(0)
+			} else {
+				for _, item := range items {
+					inputItem := item.(map[string]interface{})
+					outputItem := make(map[string]string)
+					for _, field := range command.Run.Fields {
+						if inputItem[field.Name] != nil {
+							outputItem[field.Name] = parseItemString(inputItem[field.Name])
+						}
+					}
+					outputItems = append(outputItems, outputItem)
+				}
+				if len(outputItems) == 1 && len(outputItems[0]) == 1 {
+					for _, item := range outputItems {
+						for _, v := range item {
+							fmt.Println(v)
+							if ! noExit {
+								os.Exit(0)
+							}
 						}
 					}
 				}
