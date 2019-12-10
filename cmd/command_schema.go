@@ -116,9 +116,6 @@ func downloadSchema(schemaFile string, schemaUrl string) Schema {
 	} else if resp.StatusCode() != 200 {
 		fmt.Println(resp.String())
 		os.Exit(exitCodeInvalidStatus)
-	} else if format == "json" {
-		fmt.Println(resp.String())
-		os.Exit(0)
 	} else if err := ioutil.WriteFile(schemaFile, []byte(resp.String()), 0644); err != nil {
 		fmt.Printf("Failed  to write schemaFile (%s)", schemaFile)
 		os.Exit(exitCodeUnexpected)
