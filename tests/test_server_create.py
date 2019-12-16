@@ -216,24 +216,48 @@ def assert_running_with_various_flags_should_create_servers(context):
             csv_report_writer.writerow(["wait_powered_on_failed", "some servers failed to be powered on"])
             echo_failed("Some servers failed to be powered on in the allocated time")
             all_have_expected_output_lines = False
+        servers_to_delete = []
+        for test in tests:
+            servers_to_delete.append(test['server_name'])
+        echo_info("Cloning servers", start_time=start_time)
+        all_cloned = True
+        for test in tests:
+            if 'clone' in test:
+                csv_report_writer.writerow(["start_clone", test['server_name']])
+                test['clone']['server_name'] = test['server_name'] + '_clone'
+                test['clone']['password'] = test['password']
+                exitcode, output = subprocess.getstatusoutput(
+                    "cloudcli server clone {} --source-name \"{}\" --name \"{}\" --password \"{}\" --wait {} ".format(
+                        get_api_args(), test['server_name'], test['clone']['server_name'],
+                        test['clone']['password'], test['clone']['args']
+                    )
+                )
+                if exitcode == 0:
+                    csv_report_writer.writerow(["clone_success", test['server_name']])
+                    echo_ok("server {} was cloned".format(test['server_name']))
+                    servers_to_delete.append(test['clone']['server_name'])
+                else:
+                    csv_report_writer.writerow(["clone_failed", test['server_name']])
+                    echo_failed("server {} was not cloned".format(test['server_name']))
+                    all_cloned = False
         echo_info("Deleting servers", start_time=start_time)
         all_terminated = True
-        for test in tests:
-            csv_report_writer.writerow(["start_delete", test['server_name']])
+        for server_name in servers_to_delete:
+            csv_report_writer.writerow(["start_delete", server_name])
             exitcode, output = subprocess.getstatusoutput(
                 "cloudcli server terminate {} --force --name \"{}\"".format(
-                    get_api_args(), test['server_name']
+                    get_api_args(), server_name
                 )
             )
             if exitcode == 0:
-                csv_report_writer.writerow(["delete_success", test['server_name']])
-                echo_ok("server {} was terminated".format(test['server_name']))
+                csv_report_writer.writerow(["delete_success", server_name])
+                echo_ok("server {} was terminated".format(server_name))
             else:
-                csv_report_writer.writerow(["delete_failed", test['server_name']])
-                echo_failed("server {} was not terminated".format(test['server_name']))
+                csv_report_writer.writerow(["delete_failed", server_name])
+                echo_failed("server {} was not terminated".format(server_name))
                 all_terminated = False
-        assert all_powered_on and all_terminated and all_have_expected_output_lines
-        echo_ok("All servers were powered on, terminated and have the expected output lines", start_time=start_time)
+        assert all_powered_on and all_cloned and all_terminated and all_have_expected_output_lines
+        echo_ok("All servers were powered on, (some cloned), terminated and have the expected output lines", start_time=start_time)
 
 
 def main(context):
