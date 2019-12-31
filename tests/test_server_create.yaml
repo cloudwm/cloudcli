@@ -123,16 +123,16 @@
         Linux x86_64
 
 - test-id: cpu-ram-2-disks-managed-backup-billing-monthlypackage
-  datacenter: IL-JR
-  args: --image ubuntu_server_18.04_64-bit --cpu 4B --ram 1024 --disk size=20 --disk size=10 --managed yes --dailybackup yes --billingcycle monthly --monthlypackage t5000
+  datacenter: IL
+  args: --image ubuntu_server_18.04_64-bit --cpu 4B --ram 1024 --disk size=20 --disk size=10 --managed yes --dailybackup yes --billingcycle Monthly --monthlypackage t5000
   expected_output_lines: |
-    Zone: IL-JR
+    Zone: IL
     CPU: 4
     RAM: 1024MB
     Image Name: ubuntu_server_18.04_64-bit
     Disk #1: 20GB
     Disk #2: 10GB
-    Network #1: wan-il-jr
+    Network #1: wan-il
     Daily Backup: Yes
     Managed Hosting: Yes
     Billing: Monthly
@@ -140,13 +140,13 @@
   ssh:
     user: root
     hostname:
-      from-network: "Network #1: wan-il-jr"
+      from-network: "Network #1: wan-il"
   expected_server_commands:
     - cmd: uname -sm
       expected_output_lines: |
         Linux x86_64
   clone:
-    args: ""
+    args: "--quantity 1 --poweronaftercreate no --network name=lan-82145-testlan3 --billingcycle Monthly"
 
 #- test-id: cpu-4D-4-disk-ids
 #  datacenter: EU
