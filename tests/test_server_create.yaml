@@ -146,7 +146,7 @@
       expected_output_lines: |
         Linux x86_64
   clone:
-    args: "--quantity 1 --poweronaftercreate no --network name=lan-82145-testlan3 --billingcycle Monthly"
+    args: "--quantity 1 --poweronaftercreate no --billingcycle Monthly"
 
 #- test-id: cpu-4D-4-disk-ids
 #  datacenter: EU
