@@ -1,25 +1,23 @@
-## cloudcli server snapshot
+## cloudcli server tags
 
-List/manage server snapshots
+List/manage server tags
 
 ### Synopsis
 
-List/manage server snapshots
+List/manage server tags
 
 ```
-cloudcli server snapshot [flags]
+cloudcli server tags [flags]
 ```
 
 ### Options
 
 ```
-      --create string   Name of a new snapshot to create
-      --delete string   Snapshot ID to delete
-  -h, --help            help for snapshot
+      --add string      Name of a new or existing tag to add to the server
+  -h, --help            help for tags
       --id string       Specific server UUID
       --name string     Server name or regular expression matching a single server
-      --revert string   Snaptshot ID to revert to
-      --wait            Wait for command execution to finish only then exit cli.
+      --remove string   Name of tag to remove from the server
 ```
 
 ### Options inherited from parent commands

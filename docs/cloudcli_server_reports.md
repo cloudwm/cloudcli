@@ -1,25 +1,21 @@
-## cloudcli server snapshot
+## cloudcli server reports
 
-List/manage server snapshots
+Get server monthly usage reports
 
 ### Synopsis
 
-List/manage server snapshots
+Get server monthly usage reports
 
 ```
-cloudcli server snapshot [flags]
+cloudcli server reports [flags]
 ```
 
 ### Options
 
 ```
-      --create string   Name of a new snapshot to create
-      --delete string   Snapshot ID to delete
-  -h, --help            help for snapshot
-      --id string       Specific server UUID
-      --name string     Server name or regular expression matching a single server
-      --revert string   Snaptshot ID to revert to
-      --wait            Wait for command execution to finish only then exit cli.
+  -h, --help          help for reports
+      --id string     Specific server UUID
+      --name string   Server name or regular expression matching a single server
 ```
 
 ### Options inherited from parent commands
