@@ -48,9 +48,11 @@ cloudcli --help
 * [cloudcli server poweron](docs/cloudcli_server_poweron.md)	 - Power On server/s
 * [cloudcli server reboot](docs/cloudcli_server_reboot.md)	 - Reboot server/s
 * [cloudcli server rename](docs/cloudcli_server_rename.md)	 - Rename server
+* [cloudcli server reports](docs/cloudcli_server_reports.md)	 - Get server monthly usage reports
 * [cloudcli server snapshot](docs/cloudcli_server_snapshot.md)	 - List/manage server snapshots
 * [cloudcli server sshkey](docs/cloudcli_server_sshkey.md)	 - Add an SSH public key to the server authorized keys
 * [cloudcli server statistics](docs/cloudcli_server_statistics.md)	 - Get server statistics
+* [cloudcli server tags](docs/cloudcli_server_tags.md)	 - List/manage server tags
 * [cloudcli server terminate](docs/cloudcli_server_terminate.md)	 - Terminate server/s
 
 #### Task queue management
