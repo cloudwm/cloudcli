@@ -9,6 +9,14 @@ test SSH key
 " > ./test-ssh-key
 
 echo "
+test user data
+" > ./test-user-data
+
+echo "
+echo hello world > /test-script-output
+" > ./test-script
+
+echo "
 ##### cloudcli init #####
 "
 

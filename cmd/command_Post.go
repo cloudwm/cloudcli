@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"time"
 )
 
 type ServerIdsDryrunResponse struct {
@@ -22,18 +21,6 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 	if b, _ := cmd.Flags().GetBool("interactive"); b && command.Interactive {
 		commandRunPostInteractive(cmd, command)
 	}
-	publicSshKeyFile, _ := cmd.Flags().GetString("ssh-key")
-	if publicSshKeyFile != "" {
-		if wait, _ := cmd.Flags().GetBool("wait"); ! wait {
-			fmt.Printf("--wait flag is required to set the SSH key after create\n")
-			os.Exit(exitCodeUnexpected)
-		}
-		_, err := ioutil.ReadFile(publicSshKeyFile)
-		if err != nil {
-			fmt.Printf("Failed to read public SSH key file: %s\n", publicSshKeyFile)
-			os.Exit(exitCodeUnexpected)
-		}
-	}
 	var qs []string
 	hasDryrunFlag := false
 	for _, field := range command.Run.Fields {
@@ -44,7 +31,7 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 			}
 			continue
 		}
-		var value string;
+		var value string
 		if field.Array {
 			arrayValue, _ := cmd.Flags().GetStringArray(field.Flag)
 			value = strings.Join(arrayValue, " ")
@@ -56,8 +43,17 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 			}
 		} else {
 			value, _ = cmd.Flags().GetString(field.Flag)
+			if field.FromFile && value != "" {
+				fileBytes, err := ioutil.ReadFile(value)
+				if err == nil {
+					value = string(fileBytes)
+				} else {
+					fmt.Printf("%s\n", err.Error())
+					os.Exit(exitCodeInvalidFlags)
+				}
+			}
 		}
-		escapedValue := url.PathEscape(value)
+		escapedValue := url.QueryEscape(value)
 		if (debug) {
 			fmt.Printf("field %s=%s / urlpart %s=%s\n", field.Flag, value, field.Name, escapedValue)
 		}
@@ -160,18 +156,7 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 					}
 				} else if len(commandIds) == 1 {
 					fmt.Printf("Command ID: %s\n", commandIds[0])
-					if publicSshKeyFile != "" {
-						serverName, _ := cmd.Flags().GetString("name")
-						serverPassword, _ := cmd.Flags().GetString("password")
-						waitForCommandIds(cmd, command, commandIds, getCommandOutputFormat("", command, "human"), true);
-						serverIp := getServerIP(serverName)
-						for ! setServerSshKey(serverPassword, serverIp, publicSshKeyFile) {
-							fmt.Printf("Retrying in 5 seconds...\n")
-							time.Sleep(5000000000)
-						}
-					} else {
-						waitForCommandIds(cmd, command, commandIds, getCommandOutputFormat("", command, "human"), false);
-					}
+					waitForCommandIds(cmd, command, commandIds, getCommandOutputFormat("", command, "human"), false)
 					os.Exit(0)
 				} else {
 					fmt.Println("Command IDs:")
@@ -179,10 +164,6 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 						fmt.Printf("%s\n", commandId)
 					}
 					waitForCommandIds(cmd, command, commandIds, getCommandOutputFormat("", command, "human"), false)
-					if publicSshKeyFile != "" {
-						fmt.Printf("Setting SSH key is not supported for multiple servers\n")
-						fmt.Printf("Please set manually, for each server, using server sshkey command\n")
-					}
 					os.Exit(0)
 				}
 			}

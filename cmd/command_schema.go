@@ -32,6 +32,7 @@ type SchemaCommandField struct {
 	WaitPrintField string `json:"waitPrintField"`
 	WaitError string `json:"waitError"`
 	Hide bool `json:"hide"`
+	FromFile bool `json:"fromFile"`
 }
 
 type SchemaCommandFlagProcessing struct {
