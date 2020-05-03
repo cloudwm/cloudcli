@@ -181,9 +181,7 @@
 
 - test-id: networks
   datacenter: EU
-  args: --image ubuntu_server_18.04_64-bit --network name=wan --network name=lan-82145-testnet4-gateway
-#   TODO: add the following line to the expected output lines - currently fails:
-#     Network #2: testnet4-gateway
+  args: --image ubuntu_server_18.04_64-bit --network name=wan --network name=lan-466538-testnet
   expected_output_lines: |
     Zone: EU
     CPU: 1
@@ -191,6 +189,7 @@
     Image Name: ubuntu_server_18.04_64-bit
     Disk #1: 20GB
     Network #1: wan-eu
+    Network #2: lan-466538-testnet
     Daily Backup: No
     Managed Hosting: No
   ssh:
