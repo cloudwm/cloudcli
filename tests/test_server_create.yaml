@@ -4,27 +4,27 @@
 # --password
 # --poweronaftercreate
 
-#- test-id: minimal
-#  datacenter: IL
-#  args: --image ubuntu_server_18.04_64-bit
-#  expected_output_lines: |
-#    Zone: IL
-#    CPU: 1
-#    RAM: 1024MB
-#    Image Name: ubuntu_server_18.04_64-bit
-#    Disk #1: 20GB
-#    Network #1: wan-il
-#    Daily Backup: No
-#    Managed Hosting: No
-#    Billing: Hourly
-#  ssh:
-#    user: root
-#    hostname:
-#      from-network: "Network #1: wan-il"
-#  expected_server_commands:
-#    - cmd: uname -sm
-#      expected_output_lines: |
-#        Linux x86_64
+- test-id: minimal
+  datacenter: IL
+  args: --image ubuntu_server_18.04_64-bit
+  expected_output_lines: |
+    Zone: IL
+    CPU: 1
+    RAM: 1024MB
+    Image Name: ubuntu_server_18.04_64-bit
+    Disk #1: 20GB
+    Network #1: wan-il
+    Daily Backup: No
+    Managed Hosting: No
+    Billing: Hourly
+  ssh:
+    user: root
+    hostname:
+      from-network: "Network #1: wan-il"
+  expected_server_commands:
+    - cmd: uname -sm
+      expected_output_lines: |
+        Linux x86_64
 
 - test-id: minimal-ssh-key-tags-script-userdata
   datacenter: IL
@@ -106,98 +106,98 @@
 #      expected_output_lines: |
 #        Linux x86_64
 
-#- test-id: cpu-ram
-#  datacenter: EU
-#  args: --image ubuntu_server_18.04_64-bit --cpu 2B --ram 1024
-#  expected_output_lines: |
-#    Zone: EU
-#    CPU: 2
-#    RAM: 1024MB
-#    Image Name: ubuntu_server_18.04_64-bit
-#    Disk #1: 20GB
-#    Network #1: wan-eu
-#    Daily Backup: No
-#    Managed Hosting: No
-#    Billing: Hourly
-#  ssh:
-#    user: root
-#    hostname:
-#      from-network: "Network #1: wan-eu"
-#  expected_server_commands:
-#    - cmd: uname -sm
-#      expected_output_lines: |
-#        Linux x86_64
+- test-id: cpu-ram
+  datacenter: EU
+  args: --image ubuntu_server_18.04_64-bit --cpu 2B --ram 1024
+  expected_output_lines: |
+    Zone: EU
+    CPU: 2
+    RAM: 1024MB
+    Image Name: ubuntu_server_18.04_64-bit
+    Disk #1: 20GB
+    Network #1: wan-eu
+    Daily Backup: No
+    Managed Hosting: No
+    Billing: Hourly
+  ssh:
+    user: root
+    hostname:
+      from-network: "Network #1: wan-eu"
+  expected_server_commands:
+    - cmd: uname -sm
+      expected_output_lines: |
+        Linux x86_64
 
-#- test-id: cpu-ram-2-disks-managed-backup-billing-monthlypackage
-#  datacenter: IL
-#  args: --image ubuntu_server_18.04_64-bit --cpu 4B --ram 1024 --disk size=20 --disk size=10 --managed yes --dailybackup yes --billingcycle Monthly --monthlypackage t5000
-#  expected_output_lines: |
-#    Zone: IL
-#    CPU: 4
-#    RAM: 1024MB
-#    Image Name: ubuntu_server_18.04_64-bit
-#    Disk #1: 20GB
-#    Disk #2: 10GB
-#    Network #1: wan-il
-#    Daily Backup: Yes
-#    Managed Hosting: Yes
-#    Billing: Monthly
-#    Traffic Package: 5000GB of traffic
-#  ssh:
-#    user: root
-#    hostname:
-#      from-network: "Network #1: wan-il"
-#  expected_server_commands:
-#    - cmd: uname -sm
-#      expected_output_lines: |
-#        Linux x86_64
-#  clone:
-#    args: "--quantity 1 --poweronaftercreate no --billingcycle Monthly"
+- test-id: cpu-ram-2-disks-managed-backup-billing-monthlypackage
+  datacenter: IL
+  args: --image ubuntu_server_18.04_64-bit --cpu 4B --ram 1024 --disk size=20 --disk size=10 --managed yes --dailybackup yes --billingcycle Monthly --monthlypackage t5000
+  expected_output_lines: |
+    Zone: IL
+    CPU: 4
+    RAM: 1024MB
+    Image Name: ubuntu_server_18.04_64-bit
+    Disk #1: 20GB
+    Disk #2: 10GB
+    Network #1: wan-il
+    Daily Backup: Yes
+    Managed Hosting: Yes
+    Billing: Monthly
+    Traffic Package: 5000GB of traffic
+  ssh:
+    user: root
+    hostname:
+      from-network: "Network #1: wan-il"
+  expected_server_commands:
+    - cmd: uname -sm
+      expected_output_lines: |
+        Linux x86_64
+  clone:
+    args: "--quantity 1 --poweronaftercreate no --billingcycle Monthly"
 
-#- test-id: cpu-4D-4-disk-ids
-#  datacenter: EU
-#  args: --image ubuntu_server_18.04_64-bit --cpu 4D --disk id=3,size=20 --disk size=10 --disk id=0,size=30 --disk id=1,size=60
-#  expected_output_lines: |
-#    Zone: EU
-#    CPU: 4 Dedicated
-#    RAM: 1024MB
-#    Image Name: ubuntu_server_18.04_64-bit
-#    Disk #1: 30GB
-#    Disk #2: 60GB
-#    Disk #3: 10GB
-#    Disk #4: 20GB
-#    Network #1: wan-eu
-#    Daily Backup: No
-#    Managed Hosting: No
-#    Billing: Hourly
-#  ssh:
-#    user: root
-#    hostname:
-#      from-network: "Network #1: wan-eu"
-#  expected_server_commands:
-#    - cmd: uname -sm
-#      expected_output_lines: |
-#        Linux x86_64
+- test-id: cpu-4D-4-disk-ids
+  datacenter: EU
+  args: --image ubuntu_server_18.04_64-bit --cpu 4D --disk id=3,size=20 --disk size=10 --disk id=0,size=30 --disk id=1,size=60
+  expected_output_lines: |
+    Zone: EU
+    CPU: 4 Dedicated
+    RAM: 1024MB
+    Image Name: ubuntu_server_18.04_64-bit
+    Disk #1: 30GB
+    Disk #2: 60GB
+    Disk #3: 10GB
+    Disk #4: 20GB
+    Network #1: wan-eu
+    Daily Backup: No
+    Managed Hosting: No
+    Billing: Hourly
+  ssh:
+    user: root
+    hostname:
+      from-network: "Network #1: wan-eu"
+  expected_server_commands:
+    - cmd: uname -sm
+      expected_output_lines: |
+        Linux x86_64
 
-#- test-id: networks
-#  datacenter: EU
-#  args: --image ubuntu_server_18.04_64-bit --network name=wan --network name=lan-82145-testnet4-gateway
-  # TODO: add the following line to the expected output lines - currently fails:
-  #   Network #2: testnet4-gateway
-#  expected_output_lines: |
-#    Zone: EU
-#    CPU: 1
-#    RAM: 1024MB
-#    Image Name: ubuntu_server_18.04_64-bit
-#    Disk #1: 20GB
-#    Network #1: wan-eu
-#    Daily Backup: No
-#    Managed Hosting: No
-#  ssh:
-#    user: root
-#    hostname:
-#      from-network: "Network #1: wan-eu"
-#  expected_server_commands:
-#    - cmd: uname -sm
-#      expected_output_lines: |
-#        Linux x86_64
+- test-id: networks
+  datacenter: EU
+  args: --image ubuntu_server_18.04_64-bit --network name=wan --network name=lan-82145-testnet4-gateway
+#   TODO: add the following line to the expected output lines - currently fails:
+#     Network #2: testnet4-gateway
+  expected_output_lines: |
+    Zone: EU
+    CPU: 1
+    RAM: 1024MB
+    Image Name: ubuntu_server_18.04_64-bit
+    Disk #1: 20GB
+    Network #1: wan-eu
+    Daily Backup: No
+    Managed Hosting: No
+  ssh:
+    user: root
+    hostname:
+      from-network: "Network #1: wan-eu"
+  expected_server_commands:
+    - cmd: uname -sm
+      expected_output_lines: |
+        Linux x86_64
