@@ -15,7 +15,7 @@
     Disk #1: 20GB
     Network #1: wan-il
     Daily Backup: No
-    Managed Hosting: No
+    Management Services: No
     Billing: Hourly
   ssh:
     user: root
@@ -38,7 +38,7 @@
     Disk #1: 20GB
     Network #1: wan-il
     Daily Backup: No
-    Managed Hosting: No
+    Management Services: No
     Billing: Hourly
   ssh:
     user: root
@@ -95,7 +95,7 @@
 #    Disk #1: 20GB
 #    Network #1: wan-il
 #    Daily Backup: No
-#    Managed Hosting: No
+#    Management Services: No
 #    Billing: Hourly
 #  ssh:
 #    user: root
@@ -117,7 +117,7 @@
     Disk #1: 20GB
     Network #1: wan-eu
     Daily Backup: No
-    Managed Hosting: No
+    Management Services: No
     Billing: Hourly
   ssh:
     user: root
@@ -140,7 +140,7 @@
     Disk #2: 10GB
     Network #1: wan-il
     Daily Backup: Yes
-    Managed Hosting: Yes
+    Management Services: Yes
     Billing: Monthly
     Traffic Package: 5000GB of traffic
   ssh:
@@ -168,7 +168,7 @@
     Disk #4: 20GB
     Network #1: wan-eu
     Daily Backup: No
-    Managed Hosting: No
+    Management Services: No
     Billing: Hourly
   ssh:
     user: root
@@ -191,7 +191,7 @@
     Network #1: wan-eu
     Network #2: lan-466538-testnet
     Daily Backup: No
-    Managed Hosting: No
+    Management Services: No
   ssh:
     user: root
     hostname:
