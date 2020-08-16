@@ -1,0 +1,55 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - env:
+        KAMATERA_API_CLIENT_ID: ${{ secrets.KAMATERA_API_CLIENT_ID }}
+        KAMATERA_API_SECRET: ${{ secrets.KAMATERA_API_SECRET }}
+        KAMATERA_API_SERVER: "https://cloudcli.cloudwm.com"
+        DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+        DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
+        TESTING_SSHKEY: ${{ secrets.TESTING_SSHKEY }}
+        TESTING_SSHKEY_PUB: ${{ secrets.TESTING_SSHKEY_PUB }}
+      run: |
+        mkdir -p .cloudcli/etc && export CLOUDCLI_ETC_PATH=`pwd`/.cloudcli/etc &&\
+        docker build --build-arg GOOS=linux --build-arg GOARCH=amd64 -t cloudwm-cli-build -f ./Dockerfile.build . &&\
+        docker run -d --rm --name cloudwm-cli-build -v `pwd`:/go/src/github.com/cloudwm/cli cloudwm-cli-build tail -f /dev/null &&\
+        docker exec cloudwm-cli-build dep ensure &&\
+        docker exec cloudwm-cli-build go build -o cloudcli main.go &&\
+        sudo chown $USER ./cloudcli && sudo chmod +x ./cloudcli &&\
+        export CLOUDCLI_BINARY=`pwd`/cloudcli &&\
+        echo "${TESTING_SSHKEY}" > testing_sshkey.id_rsa &&\
+        echo "${TESTING_SSHKEY_PUB}" > testing_sshkey.id_rsa.pub &&\
+        chmod 400 testing_sshkey.id_rsa &&\
+        export TESTING_SSHKEY_PATH=`pwd`/testing_sshkey.id_rsa &&\
+        mkdir .cloudcli-server &&\
+        wget https://github.com/cloudwm/cloudcli-server/archive/master.zip -O .cloudcli-server/cloudcli-server.zip &&\
+        ( cd .cloudcli-server && unzip -q cloudcli-server.zip ) &&\
+        rm .cloudcli-server/cloudcli-server.zip &&\
+        echo "${DOCKER_HUB_PASSWORD}" | docker login -u "${DOCKER_HUB_USER}" --password-stdin &&\
+        docker pull cloudwm/cloudcli-server &&\
+        docker build -t cloudwm/cloudcli-server --cache-from cloudwm/cloudcli-server .cloudcli-server/cloudcli-server-master &&\
+        docker push cloudwm/cloudcli-server &&\
+        docker run -e CLOUDCLI_PROVIDER=proxy -e CLOUDCLI_API_SERVER=https://console.kamatera.com \
+                   -e LOG_CHANNEL=errorlog -e APP_DEBUG=true \
+                   --name cloudcli-server --rm -d -p 8000:80 cloudwm/cloudcli-server &&\
+        export KAMATERA_API_SERVER=http://localhost:8000 &&\
+        mkdir .kamateratoolbox &&\
+        wget https://github.com/Kamatera/kamateratoolbox/archive/master.zip -O .kamateratoolbox/kamateratoolbox.zip &&\
+        ( cd .kamateratoolbox && unzip -q kamateratoolbox.zip ) && rm .kamateratoolbox/kamateratoolbox.zip &&\
+        cd .kamateratoolbox/kamateratoolbox-master &&\
+        sudo apt-get install -y python3-venv &&\
+        python3 -m venv venv &&\
+        venv/bin/python3 -m pip install --upgrade pip &&\
+        venv/bin/python3 -m pip install --upgrade setuptools wheel &&\
+        venv/bin/python3 -m pip install -r requirements.txt &&\
+        if ! venv/bin/pytest -n6 --dist=loadfile tests/cloudcli; then
+          docker logs cloudcli-server
+          exit 1
+        fi
