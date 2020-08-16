@@ -21,6 +21,26 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 		if ! noExit {
 			os.Exit(0)
 		}
+	} else if outputFormat == "yaml" && ! returnItems {
+		if err := json.Unmarshal(resp_body, &items); err != nil {
+			command_id, err := strconv.Atoi(string(resp_body))
+			if err == nil {
+				fmt.Println(command_id)
+				os.Exit(0)
+			} else {
+				fmt.Println(string(resp_body))
+				os.Exit(exitCodeInvalidResponse)
+			}
+		} else if d, err := yaml.Marshal(&items); err != nil {
+			fmt.Println(string(resp_body))
+			fmt.Println("Invalid response from server")
+			os.Exit(exitCodeInvalidResponse)
+		} else {
+			fmt.Println(string(d))
+			if ! noExit {
+				os.Exit(0)
+			}
+		}
 	} else {
 		if err := json.Unmarshal(resp_body, &items); err != nil {
 			command_id, err := strconv.Atoi(string(resp_body))
@@ -34,85 +54,72 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 			}
 		}
 		if ! returnItems {
-			if outputFormat == "yaml" {
-				if d, err := yaml.Marshal(&items); err != nil {
-					fmt.Println(string(resp_body))
-					fmt.Println("Invalid response from server")
-					os.Exit(exitCodeInvalidResponse)
-				} else {
-					fmt.Println(string(d))
-					if ! noExit {
-						os.Exit(0)
+			var outputItems []map[string]string;
+			if command.Run.ParseStatisticsResponse {
+				var metric string;
+				var value string;
+				var timestamp int64;
+				for _, response := range items {
+					for _, subResponse := range response.([]interface{}) {
+						seriesResponse := subResponse.(map[string]interface{})
+						metric = seriesResponse["series"].(string)
+						for _, data := range seriesResponse["data"].([]interface{}) {
+							dataItems := data.([]interface{})
+							timestamp = int64(dataItems[0].(float64))
+							value = parseItemString(dataItems[1])
+							outputItem := make(map[string]string)
+							outputItem["metric"] = metric
+							outputItem["date"] = time.Unix(timestamp/1000, 0).Format("2006-01-02 15:04:05")
+							outputItem["value"] = value
+							outputItems = append(outputItems, outputItem)
+						}
 					}
 				}
 			} else {
-				var outputItems []map[string]string;
-				if command.Run.ParseStatisticsResponse {
-					var metric string;
-					var value string;
-					var timestamp int64;
-					for _, response := range items {
-						for _, subResponse := range response.([]interface{}) {
-							seriesResponse := subResponse.(map[string]interface{})
-							metric = seriesResponse["series"].(string)
-							for _, data := range seriesResponse["data"].([]interface{}) {
-								dataItems := data.([]interface{})
-								timestamp = int64(dataItems[0].(float64))
-								value = parseItemString(dataItems[1])
-								outputItem := make(map[string]string)
-								outputItem["metric"] = metric
-								outputItem["date"] = time.Unix(timestamp/1000, 0).Format("2006-01-02 15:04:05")
-								outputItem["value"] = value
-								outputItems = append(outputItems, outputItem)
-							}
-						}
-					}
-				} else {
-					for _, item := range items {
-						inputItem := item.(map[string]interface{})
-						outputItem := make(map[string]string)
-						for _, field := range command.Run.Fields {
-							if inputItem[field.Name] != nil {
-								outputItem[field.Name] = parseItemString(inputItem[field.Name])
-							}
-						}
-						outputItems = append(outputItems, outputItem)
-					}
-					if len(outputItems) == 1 && len(outputItems[0]) == 1 {
-						for _, item := range outputItems {
-							for _, v := range item {
-								fmt.Println(v)
-								if ! noExit {
-									os.Exit(0)
-								}
-							}
-						}
-					}
-				}
-				w := tabwriter.NewWriter(
-					os.Stdout, 10, 0, 3, ' ',
-					0,
-				)
-				var header []string
-				for _, field := range command.Run.Fields {
-					if ! field.Long && ! field.Hide {
-						header = append(header, strings.ToUpper(field.Name))
-					}
-				}
-				_, _ = fmt.Fprintf(w, "%s\n", strings.Join(header, "\t"))
-				for _, outputItem := range outputItems {
-					var row []string
+				for _, item := range items {
+					inputItem := item.(map[string]interface{})
+					outputItem := make(map[string]string)
 					for _, field := range command.Run.Fields {
-						if ! field.Hide {
-							row = append(row, outputItem[field.Name])
+						if inputItem[field.Name] != nil {
+							outputItem[field.Name] = parseItemString(inputItem[field.Name])
 						}
 					}
-					_, _ = fmt.Fprintf(w, "%s\n", strings.Join(row, "\t"))
+					outputItems = append(outputItems, outputItem)
 				}
-				_ = w.Flush()
-				if ! noExit {
-					os.Exit(0)
+				if len(outputItems) == 1 && len(outputItems[0]) == 1 {
+					for _, item := range outputItems {
+						for _, v := range item {
+							fmt.Println(v)
+							if ! noExit {
+								os.Exit(0)
+							}
+						}
+					}
 				}
+			}
+			w := tabwriter.NewWriter(
+				os.Stdout, 10, 0, 3, ' ',
+				0,
+			)
+			var header []string
+			for _, field := range command.Run.Fields {
+				if ! field.Long && ! field.Hide {
+					header = append(header, strings.ToUpper(field.Name))
+				}
+			}
+			_, _ = fmt.Fprintf(w, "%s\n", strings.Join(header, "\t"))
+			for _, outputItem := range outputItems {
+				var row []string
+				for _, field := range command.Run.Fields {
+					if ! field.Hide {
+						row = append(row, outputItem[field.Name])
+					}
+				}
+				_, _ = fmt.Fprintf(w, "%s\n", strings.Join(row, "\t"))
+			}
+			_ = w.Flush()
+			if ! noExit {
+				os.Exit(0)
 			}
 		}
 	}
