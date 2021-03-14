@@ -76,6 +76,11 @@ type SchemaCommandRun struct {
 	ParseStatisticsResponse bool `json:"ParseStatisticsResponse"`
 }
 
+type SchemaCommandCliPreRunHook struct {
+	Type string `json:"type"`
+	OneOf []string `json:"oneOf"`
+}
+
 type SchemaCommand struct {
 	Alpha bool `json:"alpha"`
 	Use string `json:"use"`
@@ -89,6 +94,8 @@ type SchemaCommand struct {
 	CacheFile string `json:"cache-file"`
 	DontSortFlags bool `json:"dont-sort-flags"`
 	Interactive bool `json:"interactive"`
+	CliUsage string `json:"cliUsage"`
+	CliPreRunHooks []SchemaCommandCliPreRunHook `json:"cliPreRunHooks"`
 }
 
 type Schema struct {
@@ -164,6 +171,9 @@ func createCommandFromSchema(command SchemaCommand) *cobra.Command {
 		cmd = &cobra.Command{
 			Use: command.Use, Short: command.Short, Long: command.Short,
 			Aliases: command.Aliases,
+			PreRun: func(cmd *cobra.Command, args []string) {
+				commandPreRun(cmd, command)
+			},
 			Run: func(cmd *cobra.Command, args []string) {
 				commandRun(cmd, command)
 			},

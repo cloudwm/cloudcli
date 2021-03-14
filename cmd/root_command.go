@@ -129,7 +129,7 @@ Use "{{.CommandPath}} [command] --help" for more information about a command.{{e
 
 func initSubCommands() {
 	for _, command := range cli_schema.Commands {
-		var cmd= createCommandFromSchema(command)
+		var cmd = createCommandFromSchema(command)
 		for _, subcommand := range command.Commands {
 			if ! subcommand.Alpha || enableAlpha {
 				var subcmd= createCommandFromSchema(subcommand)

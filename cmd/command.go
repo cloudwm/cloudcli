@@ -36,6 +36,53 @@ func commandInit(cmd *cobra.Command, command SchemaCommand) {
 	if command.Run.Cmd == "getListOfLists" {
 		commandInitGetListOfLists(cmd, command)
 	}
+	cliUsage := command.CliUsage
+	if cliUsage != "" {
+		cliUsage = fmt.Sprintf("\n\n%s", cliUsage)
+	}
+	cmd.SetUsageTemplate(fmt.Sprintf(`Usage:{{if .Runnable}}
+  {{.UseLine}}{{end}}%s{{if .HasAvailableSubCommands}}
+  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+
+Aliases:
+  {{.NameAndAliases}}{{end}}{{if .HasExample}}
+
+Examples:
+{{.Example}}{{end}}{{if .HasAvailableSubCommands}}
+
+Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+Flags:
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+Use "cloudcli --help" for a list of available global flags and general usage instructions.{{end}}{{if .HasHelpSubCommands}}
+
+Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
+  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+
+Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
+`, cliUsage))
+}
+
+func commandPreRun(cmd *cobra.Command, command SchemaCommand) {
+	for _, hook := range command.CliPreRunHooks {
+		if hook.Type == "requireOneOf" {
+			numFlags := 0
+			for _, name := range hook.OneOf {
+				flag := cmd.Flags().Lookup(name); if flag != nil {
+					numFlags += 1
+				}
+			}
+			if numFlags != 1 {
+				fmt.Printf(
+					"syntax error, missing parameter, use cloudcli %s %s --help for more information\n",
+					cmd.Parent().Use, cmd.Use,
+				)
+				os.Exit(exitCodeInvalidFlags)
+			}
+		}
+	}
 }
 
 func commandRun(cmd *cobra.Command, command SchemaCommand) {
