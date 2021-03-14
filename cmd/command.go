@@ -70,13 +70,13 @@ func commandPreRun(cmd *cobra.Command, command SchemaCommand) {
 		if hook.Type == "requireOneOf" {
 			numFlags := 0
 			for _, name := range hook.OneOf {
-				flag := cmd.Flags().Lookup(name); if flag != nil {
+				val, _ := cmd.Flags().GetString(name); if val != "" {
 					numFlags += 1
 				}
 			}
 			if numFlags != 1 {
 				fmt.Printf(
-					"syntax error, missing parameter, use cloudcli %s %s --help for more information\n",
+					"syntax error, invalid arguments, use cloudcli %s %s --help for more information\n",
 					cmd.Parent().Use, cmd.Use,
 				)
 				os.Exit(exitCodeInvalidFlags)
