@@ -1,23 +1,24 @@
-## cloudcli server sshkey
+## cloudcli server hdlib
 
-Add an SSH public key to the server authorized keys
+List cloneable hard-disks / Clone to hard-disk library 
 
 ### Synopsis
 
-Add an SSH public key to the server authorized keys
+List cloneable hard-disks / Clone to hard-disk library 
 
 ```
-cloudcli server sshkey [flags]
+cloudcli server hdlib [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help                help for sshkey
+      --clone string        UUID Of hard-disk to clone
+  -h, --help                help for hdlib
       --id string           Specific server UUID
+      --image-name string   Name of image to clone the hard-disk as
       --name string         Server name or regular expression matching a single server
-      --password string     The server SSH password.
-      --public-key string   Path to the public key file
+      --wait                Wait for command execution to finish only then exit cli.
 ```
 
 ### Options inherited from parent commands

@@ -26,11 +26,11 @@ You can set credentials and arguments using one of the following options:
 
 * A yaml configuration file at HOME/.cloudcli.yaml (or specified using the CLOUDCLI_CONFIG env var or --config flag)
 * Environment variables - uppercase strings, split with underscore and prefixed with CLOUDCLI_
-* CLI flags: --api-server "" --api-clientid "" --api-secret ""
+* CLI flags: --api-clientid "" --api-secret ""
 
 See [example.cloudcli.yaml](https://github.com/cloudwm/cloudcli/blob/master/example-cloudcli.yaml) and [example-cloudcli.env](https://github.com/cloudwm/cloudcli/blob/master/example-cloudcli.env) for more details on using the yaml config file or environment variables.
 
-**Important** Please keep your server and API credentials secure, 
+**Important** Please keep your API credentials secure, 
 it's recommended to use a configuration file with appropriate permissions and location.
 `
 }

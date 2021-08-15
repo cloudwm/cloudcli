@@ -84,6 +84,7 @@ func loadGlobalFlags() {
 func addGlobalFlags() {
 	rootCmd.PersistentFlags().StringVar(&flagApiServerValue, flagApiServer, "", "API Server Hostname")
 	_ = viper.BindPFlag(flagApiServerKey, rootCmd.PersistentFlags().Lookup(flagApiServer))
+	rootCmd.PersistentFlags().Lookup(flagApiServer).Hidden = true
 
 	rootCmd.PersistentFlags().StringVar(&flagApiClientidValue, flagApiClientid, "", "API Client ID")
 	_ = viper.BindPFlag(flagApiClientidKey, rootCmd.PersistentFlags().Lookup(flagApiClientid))
