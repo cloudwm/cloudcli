@@ -97,6 +97,9 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 				}
 				commandRunSsh(cmd, command, body, publicKey)
 				os.Exit(exitCodeUnexpected)
+			} else if command.Run.EmptyServerResponse {
+				fmt.Printf("OK\n")
+				os.Exit(0)
 			} else {
 				var commandIds []string;
 				if err := json.Unmarshal(body, &commandIds); err != nil {

@@ -74,6 +74,7 @@ type SchemaCommandRun struct {
 	Lists []SchemaCommandList `json:"lists"`
 	ServerMethod string `json:"serverMethod"`
 	ParseStatisticsResponse bool `json:"ParseStatisticsResponse"`
+	EmptyServerResponse bool `json:"EmptyServerResponse"`
 }
 
 type SchemaCommandCliPreRunHook struct {
