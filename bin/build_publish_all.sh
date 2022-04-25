@@ -10,11 +10,14 @@
 # following env vars are needed to sign the mac binary via the mac VM:
 #   export AWS_ACCESS_KEY_ID=
 #   export AWS_SECRET_ACCESS_KEY=
-#   export AWS_REGION=
-#   export AWS_MAC_INSTANCE_AVAILABILITY_ZONE=
+#   export AWS_REGION=eu-central-1
+#   export AWS_MAC_INSTANCE_AVAILABILITY_ZONE=eu-central-1c
 #   export AWS_MAC_INSTANCE_ID=
-#   export AWS_MAC_DEDICATED_HOST_ID=
 #   export AWS_MAC_PEM_KEY_PATH=/path/to/mac.pem
+#  apple username
+#   export AC_USERNAME=
+#  apple app-specific password
+#   export AC_PASSWORD=
 # run the flow:
 #   bin/build_publish_all.sh
 
