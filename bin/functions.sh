@@ -125,12 +125,12 @@ wait_for() {
 }
 
 sign_mac_binaries() {
-  local amd64_tar_gz="${1}"
+  export amd64_tar_gz="${1}"
   # pulled Apr 18, 2022
-  local aws_cli_image="amazon/aws-cli@sha256:579f6355a1f153946f73fec93955573700a2eb0b63f9ae853000830cf6bf351a"
-  alias aws="docker run -e AWS_REGION -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY $aws_cli_image"
+  export aws_cli_image="amazon/aws-cli@sha256:579f6355a1f153946f73fec93955573700a2eb0b63f9ae853000830cf6bf351a"
+  export aws="docker run -e AWS_REGION -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY $aws_cli_image"
   docker pull $aws_cli_image &&\
-  local dedicated_host_id=$(aws ec2 describe-hosts | python3 -c "
+  export dedicated_host_id=$($aws ec2 describe-hosts | python3 -c "
 import sys, json, os
 for host in json.load(sys.stdin)['Hosts']:
   if len(host.get('Instances', [])) == 1 and host['Instances'][0].get('InstanceId') == os.environ.get('AWS_MAC_INSTANCE_ID'):
@@ -139,18 +139,18 @@ for host in json.load(sys.stdin)['Hosts']:
   ") &&\
   if [ "${dedicated_host_id}" == "" ]; then
     echo allocating new dedicated host &&\
-    local allocate_hosts_res="$(aws ec2 allocate-hosts --availability-zone "${AWS_MAC_INSTANCE_AVAILABILITY_ZONE}" \
+    export allocate_hosts_res="$($aws ec2 allocate-hosts --availability-zone "${AWS_MAC_INSTANCE_AVAILABILITY_ZONE}" \
       --instance-type mac1.metal --quantity 1)" &&\
-    local dedicated_host_id=$(echo $allocate_hosts_res | jq -r '.HostIds[0]') &&\
-    aws ec2 modify-instance-placement --host-id $dedicated_host_id --instance-id $AWS_MAC_INSTANCE_ID &&\
+    export dedicated_host_id=$(echo $allocate_hosts_res | jq -r '.HostIds[0]') &&\
+    $aws ec2 modify-instance-placement --host-id $dedicated_host_id --instance-id $AWS_MAC_INSTANCE_ID &&\
     echo allocated new dedicated host $dedicated_host_id
   else
     echo got existing dedicated host $dedicated_host_id
   fi &&\
-  aws ec2 start-instances --instance-ids $AWS_MAC_INSTANCE_ID &&\
-  wait_for '[ "running" == "$(aws ec2 describe-instances --instance-ids $AWS_MAC_INSTANCE_ID | jq -r ".Reservations[0].Instances[0].State.Name" | tee /dev/stderr)" ]' \
+  $aws ec2 start-instances --instance-ids $AWS_MAC_INSTANCE_ID &&\
+  wait_for '[ "running" == "$($aws ec2 describe-instances --instance-ids $AWS_MAC_INSTANCE_ID | jq -r ".Reservations[0].Instances[0].State.Name" | tee /dev/stderr)" ]' \
     "waiting for instance to be running..." 5 50 &&\
-  local ip="$(aws ec2 describe-instances --instance-ids $AWS_MAC_INSTANCE_ID | jq -r '.Reservations[0].Instances[0].NetworkInterfaces[0].Association.PublicIp')" &&\
+  export ip="$($aws ec2 describe-instances --instance-ids $AWS_MAC_INSTANCE_ID | jq -r '.Reservations[0].Instances[0].NetworkInterfaces[0].Association.PublicIp')" &&\
   echo ip=$ip &&\
   wait_for 'scp -i $AWS_MAC_PEM_KEY_PATH -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $amd64_tar_gz ec2-user@$ip:cloudcli-amd64.tar.gz' \
     "waiting for ssh access to instance..." 5 50 &&\

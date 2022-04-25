@@ -23,7 +23,7 @@
 
 source bin/functions.sh
 build_all_binary_archives "${BUILD_ENV_DOCKER_IMAGE_BASE_NAME}" "${BUILD_ENV_DOCKER_IMAGE_TAG}" &&\
-sign_mac_binary cloudcli-darwin-amd64.tar.gz &&\
+sign_mac_binaries cloudcli-darwin-amd64.tar.gz &&\
 if [ "${PUBLISH_BINARIES_VERSION}" == "" ]; then
   echo Skipping publishing binaries
 else
