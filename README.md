@@ -8,7 +8,7 @@ Download the latest binary for your OS/architecture:
 
 **Windows**: [64 bit](https://cloudcli.cloudwm.com/binaries/latest/cloudcli-windows-amd64.zip) | [32 bit](https://cloudcli.cloudwm.com/binaries/latest/cloudcli-windows-386.zip)
 
-**Mac OS X**: [64 bit](https://cloudcli.cloudwm.com/binaries/latest/cloudcli-darwin-amd64.tar.gz) | [32 bit](https://cloudcli.cloudwm.com/binaries/latest/cloudcli-darwin-386.tar.gz)
+**Mac OS X**: [64 bit](https://cloudcli.cloudwm.com/binaries/latest/cloudcli-darwin-amd64.zip)
 
 **Linux**: [64 bit](https://cloudcli.cloudwm.com/binaries/latest/cloudcli-linux-amd64.tar.gz) | [32 bit](https://cloudcli.cloudwm.com/binaries/latest/cloudcli-linux-386.tar.gz)
 
