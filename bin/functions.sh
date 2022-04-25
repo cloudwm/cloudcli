@@ -23,7 +23,9 @@ make_build_environment() {
                  -t "${docker_image}"  -f ./Dockerfile.build \
                  .
   fi &&\
-  docker push "${docker_image}" &&\
+  if [ "${CLOUDCLI_BUILD_ENVIRONMENT_SKIP_DOCKER_PUSH}" != "true" ]; then
+    docker push "${docker_image}"
+  fi &&\
   docker run --rm -v "`pwd`:/go/src/github.com/cloudwm/cli" "${docker_image}" dep ensure
 }
 
@@ -67,7 +69,7 @@ build_binary_archive() {
 build_all_binary_archives() {
   local image_base_name="${1}"
   local image_tag="${2}"
-  build_binary_archive darwin 386 "${image_base_name}" "${image_tag}" &&\
+  # build_binary_archive darwin 386 "${image_base_name}" "${image_tag}" &&\
   build_binary_archive darwin amd64 "${image_base_name}" "${image_tag}" &&\
   build_binary_archive linux 386 "${image_base_name}" "${image_tag}" &&\
   build_binary_archive linux amd64 "${image_base_name}" "${image_tag}" &&\
@@ -101,4 +103,76 @@ run_tests() {
   fi &&\
   build_binary linux amd64 "${image_base_name}" "${image_tag}" &&\
   bin/test.sh all
+}
+
+wait_for() {
+  local condition="${1}"
+  local wait_for_message="${2}"
+  local sleep_seconds="${3}"
+  local max_iterations="${4}"
+  local num_iterations=0
+  local res=0
+  while ! eval "${condition}"; do
+    num_iterations=$(expr $num_iterations + 1)
+    if [ "${num_iterations}" == $(expr $max_iterations + 1) ]; then
+      res=1
+      break
+    fi
+    echo "${wait_for_message}"
+    sleep $sleep_seconds
+  done
+  return $res
+}
+
+sign_mac_binaries() {
+  local amd64_tar_gz="${1}"
+  # pulled Apr 18, 2022
+  local aws_cli_image="amazon/aws-cli@sha256:579f6355a1f153946f73fec93955573700a2eb0b63f9ae853000830cf6bf351a"
+  alias aws="docker run -e AWS_REGION -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY $aws_cli_image"
+  docker pull $aws_cli_image &&\
+  local dedicated_host_id=$(aws ec2 describe-hosts | python3 -c "
+import sys, json, os
+for host in json.load(sys.stdin)['Hosts']:
+  if len(host.get('Instances', [])) == 1 and host['Instances'][0].get('InstanceId') == os.environ.get('AWS_MAC_INSTANCE_ID'):
+    print(host['HostId'])
+    break
+  ") &&\
+  if [ "${dedicated_host_id}" == "" ]; then
+    echo allocating new dedicated host &&\
+    local allocate_hosts_res="$(aws ec2 allocate-hosts --availability-zone "${AWS_MAC_INSTANCE_AVAILABILITY_ZONE}" \
+      --instance-type mac1.metal --quantity 1)" &&\
+    local dedicated_host_id=$(echo $allocate_hosts_res | jq -r '.HostIds[0]') &&\
+    aws ec2 modify-instance-placement --host-id $dedicated_host_id --instance-id $AWS_MAC_INSTANCE_ID &&\
+    echo allocated new dedicated host $dedicated_host_id
+  else
+    echo got existing dedicated host $dedicated_host_id
+  fi &&\
+  aws ec2 start-instances --instance-ids $AWS_MAC_INSTANCE_ID &&\
+  wait_for '[ "running" == "$(aws ec2 describe-instances --instance-ids $AWS_MAC_INSTANCE_ID | jq -r ".Reservations[0].Instances[0].State.Name" | tee /dev/stderr)" ]' \
+    "waiting for instance to be running..." 5 50 &&\
+  local ip="$(aws ec2 describe-instances --instance-ids $AWS_MAC_INSTANCE_ID | jq -r '.Reservations[0].Instances[0].NetworkInterfaces[0].Association.PublicIp')" &&\
+  echo ip=$ip &&\
+  wait_for 'scp -i $AWS_MAC_PEM_KEY_PATH -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $amd64_tar_gz ec2-user@$ip:cloudcli-amd64.tar.gz' \
+    "waiting for ssh access to instance..." 5 50 &&\
+  ssh -i $AWS_MAC_PEM_KEY_PATH -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ec2-user@$ip "tar -xzvf cloudcli-amd64.tar.gz && ls -lah cloudcli gon-config.json"
+  ssh -i $AWS_MAC_PEM_KEY_PATH -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ec2-user@$ip '
+    echo "cd /Users/ec2-user && /usr/local/bin/gon -log-level debug gon-config.json" | sudo su -l
+  ' &&\
+  ssh -i $AWS_MAC_PEM_KEY_PATH -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ec2-user@$ip "ls -lah cloudcli.zip" &&\
+  scp -i $AWS_MAC_PEM_KEY_PATH -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ec2-user@$ip:cloudcli.zip ./cloudcli-darwin-amd64.zip
+}
+
+stop_mac_instance_release_host() {
+  # pulled Apr 18, 2022
+  local aws_cli_image="amazon/aws-cli@sha256:579f6355a1f153946f73fec93955573700a2eb0b63f9ae853000830cf6bf351a"
+  alias aws="docker run -e AWS_REGION -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY $aws_cli_image"
+  docker pull $aws_cli_image &&\
+  aws ec2 stop-instances --instance-ids $AWS_MAC_INSTANCE_ID &&\
+  while [ "stopped" != "$(aws ec2 describe-instances --instance-ids $AWS_MAC_INSTANCE_ID | jq -r '.Reservations[0].Instances[0].State.Name' | tee /dev/stderr)" ]; do
+    echo Waiting for instance to be stopped...
+    sleep 5
+  done &&\
+  local dedicated_host_id="$(aws ec2 describe-instances --instance-ids $AWS_MAC_INSTANCE_ID | jq -r '.Reservations[0].Instances[0].Placement.HostId')" &&\
+  echo dedicated_host_id=$dedicated_host_id &&\
+  aws ec2 release-hosts --host-ids $dedicated_host_id
 }
