@@ -40,8 +40,8 @@ subprocess.check_call(['docker', 'pull', aws_cli_image])
 num_unreleasable_hosts = 0
 num_released_hosts = 0
 for host in json.loads(subprocess.check_output([*aws, 'ec2', 'describe-hosts']).decode())['Hosts']:
-    allocation_time = datetime.datetime.strptime(host['AllocationTime'], '%Y-%m-%dT%H:%M:%S%z')
-    if allocation_time + datetime.timedelta(hours=25) <= datetime.datetime.now(datetime.timezone.utc):
+    allocation_time = datetime.datetime.strptime(host['AllocationTime'].split('+')[0], '%Y-%m-%dT%H:%M:%S')
+    if allocation_time + datetime.timedelta(hours=25) <= datetime.datetime.now():
         release_host(aws, host)
         num_released_hosts += 1
     else:
