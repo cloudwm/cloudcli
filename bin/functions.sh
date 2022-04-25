@@ -161,18 +161,3 @@ for host in json.load(sys.stdin)['Hosts']:
   ssh -i $AWS_MAC_PEM_KEY_PATH -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ec2-user@$ip "ls -lah cloudcli.zip" &&\
   scp -i $AWS_MAC_PEM_KEY_PATH -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ec2-user@$ip:cloudcli.zip ./cloudcli-darwin-amd64.zip
 }
-
-stop_mac_instance_release_host() {
-  # pulled Apr 18, 2022
-  local aws_cli_image="amazon/aws-cli@sha256:579f6355a1f153946f73fec93955573700a2eb0b63f9ae853000830cf6bf351a"
-  alias aws="docker run -e AWS_REGION -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY $aws_cli_image"
-  docker pull $aws_cli_image &&\
-  aws ec2 stop-instances --instance-ids $AWS_MAC_INSTANCE_ID &&\
-  while [ "stopped" != "$(aws ec2 describe-instances --instance-ids $AWS_MAC_INSTANCE_ID | jq -r '.Reservations[0].Instances[0].State.Name' | tee /dev/stderr)" ]; do
-    echo Waiting for instance to be stopped...
-    sleep 5
-  done &&\
-  local dedicated_host_id="$(aws ec2 describe-instances --instance-ids $AWS_MAC_INSTANCE_ID | jq -r '.Reservations[0].Instances[0].Placement.HostId')" &&\
-  echo dedicated_host_id=$dedicated_host_id &&\
-  aws ec2 release-hosts --host-ids $dedicated_host_id
-}
