@@ -105,7 +105,13 @@ type Schema struct {
 	SchemaGeneratedAt time.Time `json:"schema_generated_at"`
 }
 
+func getSupportsParam() string {
+	// comma-separated list of cloudcli-server functionality this cli version supports
+	return "SimpleJsonServerResponse"
+}
+
 func downloadSchema(schemaFile string, schemaUrl string) Schema {
+	schemaUrl = fmt.Sprintf("%s?supports=%s", schemaUrl, getSupportsParam())
 	var schema_ Schema
 	if dryrun || debug {
 		if debug {
