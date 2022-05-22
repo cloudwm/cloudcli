@@ -59,3 +59,13 @@ cloudcli --help
 
 * [cloudcli queue detail](docs/cloudcli_queue_detail.md)	 - Get details of tasks
 * [cloudcli queue list](docs/cloudcli_queue_list.md)	 - List all tasks in queue
+
+#### Network management
+
+* [cloudcli network create](docs/cloudcli_network_create.md)	 - Create a network
+* [cloudcli network delete](docs/cloudcli_network_delete.md)	 - Delete a network (must delete all subnets first)
+* [cloudcli network list](docs/cloudcli_network_list.md)	 - List networks
+* [cloudcli network subnet_create](docs/cloudcli_network_subnet_create.md)	 - Create a network subnet
+* [cloudcli network subnet_delete](docs/cloudcli_network_subnet_delete.md)	 - Delete a network subnet
+* [cloudcli network subnet_edit](docs/cloudcli_network_subnet_edit.md)	 - Edit a network subnet, all values which are different then existing values will be updated
+* [cloudcli network subnet_list](docs/cloudcli_network_subnet_list.md)	 - List network subnets
