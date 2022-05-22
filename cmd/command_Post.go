@@ -97,6 +97,35 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 				}
 				commandRunSsh(cmd, command, body, publicKey)
 				os.Exit(exitCodeUnexpected)
+			} else if command.Run.SimpleJsonServerResponse {
+				if format == "json" {
+					fmt.Println(string(body))
+					os.Exit(0)
+				} else {
+					var response map[string]string
+					if err := json.Unmarshal(body, &response); err != nil {
+						fmt.Println(string(body))
+						fmt.Println("Failed to parse server response")
+						os.Exit(exitCodeInvalidResponse)
+					} else if format == "yaml" {
+						var d []byte
+						d, err = yaml.Marshal(&response)
+						if err != nil {
+							fmt.Println(string(body))
+							fmt.Println("Invalid response from server")
+							os.Exit(exitCodeInvalidResponse)
+						} else {
+							fmt.Println(string(d))
+							os.Exit(0)
+						}
+					} else {
+						message, hasMessage := response["message"]
+						if hasMessage {
+							fmt.Println(message)
+							os.Exit(0)
+						}
+					}
+				}
 			} else {
 				var commandIds []string;
 				if err := json.Unmarshal(body, &commandIds); err != nil {
