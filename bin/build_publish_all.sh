@@ -7,7 +7,9 @@
 #   export BUILD_ENV_DOCKER_IMAGE_TAG=latest
 #   export PUBLISH_BINARIES_VERSION=v0.0.0
 #   export CLOUDCLI_BUILD_ENVIRONMENT_SKIP_DOCKER_PUSH=true
-# following env vars are needed to sign the mac binary via the mac VM:
+
+# To sign mac binaries follow the guide at /MAC_SIGN.md
+# you need the following env vars are needed to sign the mac binary via the mac VM:
 #   export AWS_ACCESS_KEY_ID=
 #   export AWS_SECRET_ACCESS_KEY=
 #   export AWS_REGION=eu-central-1
