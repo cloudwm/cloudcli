@@ -87,6 +87,7 @@ type SchemaCommand struct {
 	Use string `json:"use"`
 	Aliases []string `json:"aliases"`
 	Short string `json:"short"`
+	Long string `json:"long"`
 	Run SchemaCommandRun `json:"run"`
 	Flags []SchemaCommandFlag `json:"flags"`
 	Commands []SchemaCommand `json:"commands"`
@@ -172,11 +173,15 @@ func loadSchema() (bool, Schema) {
 
 func createCommandFromSchema(command SchemaCommand) *cobra.Command {
 	var cmd *cobra.Command
+	var commandLong = command.Long
+	if commandLong == "" {
+		commandLong = command.Short
+	}
 	if command.Run.Cmd == "" {
-		cmd = &cobra.Command{Use: command.Use, Short: command.Short, Long: command.Short}
+		cmd = &cobra.Command{Use: command.Use, Short: command.Short, Long: commandLong}
 	} else {
 		cmd = &cobra.Command{
-			Use: command.Use, Short: command.Short, Long: command.Short,
+			Use: command.Use, Short: command.Short, Long: commandLong,
 			Aliases: command.Aliases,
 			PreRun: func(cmd *cobra.Command, args []string) {
 				commandPreRun(cmd, command)
