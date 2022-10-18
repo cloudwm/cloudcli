@@ -28,7 +28,7 @@ sudo passwd ec2-user
   * Navigate to the certificates page.
   * Click the “+” icon, select “Developer ID Application” and follow the steps.
   * Download the certificate so it's available on the mac instance
-* in the mac instance VNC double-click the certificate to import it into your keychain
+* in the mac instance VNC double-click the certificate to import it into the system keychain
 * To verify you did this correctly, you can inspect your keychain:
 ```
 $ security find-identity -v
@@ -47,12 +47,9 @@ $ security find-identity -v
     "sign" :{
         "application_identity" : "4194587FE60D93D416CF3F4669FF913C7BBA4271"
     },
-    "dmg" :{
-        "output_path":  "./cloudcli.dmg",
-        "volume_name":  "cloudcli"
-    },
     "zip" :{
         "output_path" : "./cloudcli.zip"
     }
 }
 ```
+* Install gon: `brew install mitchellh/gon/gon`
