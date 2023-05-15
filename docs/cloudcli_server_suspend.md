@@ -1,22 +1,22 @@
-## cloudcli server description
+## cloudcli server suspend
 
-Get or set server description
+Suspend server/s
 
 ### Synopsis
 
-Get or set server description
+Suspend server/s
 
 ```
-cloudcli server description [flags]
+cloudcli server suspend [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help          help for description
+  -h, --help          help for suspend
       --id string     Specific server UUID
-      --name string   Server name or regular expression matching a single server
-      --set string    Set server description to the given value
+      --name string   Server name or regular expression matching multiple servers
+      --wait          Wait for command execution to finish only then exit cli.
 ```
 
 ### Options inherited from parent commands
