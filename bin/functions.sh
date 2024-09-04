@@ -124,8 +124,6 @@ wait_for() {
 }
 
 sign_mac_binaries() {
-  echo signing mac binaries does not work at the moment
-  return 0
   export amd64_tar_gz="${1}"
   # pulled Apr 18, 2022
   export aws_cli_image="amazon/aws-cli@sha256:579f6355a1f153946f73fec93955573700a2eb0b63f9ae853000830cf6bf351a"
@@ -160,9 +158,7 @@ for host in json.load(sys.stdin)['Hosts']:
     tar -xzvf cloudcli-amd64.tar.gz && ls -lah cloudcli &&\
     codesign --sign $NOTARY_APPLICATION_ID --options runtime --timestamp --deep ./cloudcli &&\
     zip -r cloudcli.zip ./cloudcli &&\
-    xcrun notarytool submit ./cloudcli.zip --apple-id $NOTARY_APPLICATION_ID --team-id $NOTARY_TEAM_ID --password $NOTARY_PASSWORD --wait &&\
-    xcrun stapler staple ./cloudcli &&\
-    zip -r cloudcli.zip ./cloudcli &&\
+    xcrun notarytool submit ./cloudcli.zip --apple-id $NOTARY_APPLE_ID --team-id $NOTARY_TEAM_ID --password $NOTARY_PASSWORD --wait &&\
     ls -lah cloudcli.zip
   ' &&\
   scp -i $AWS_MAC_PEM_KEY_PATH -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ec2-user@$ip:cloudcli.zip ./cloudcli-darwin-amd64.zip
