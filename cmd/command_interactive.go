@@ -57,17 +57,25 @@ func getInteractiveFlagValue_Datacenter(reader *bufio.Reader) string {
 
 func getCpuLetter(cpu string) string {
 	for _, letter := range []string{"A", "T", "D", "B"} {
-		if strings.HasSuffix(cpu, letter) {return letter}
+		if strings.HasSuffix(cpu, letter) {
+			return letter
+		}
 	}
 	return ""
 }
 
 func getCpuLetterCategory(cpuLetter string) string {
-	if cpuLetter == "A" {return "Availability"
-	} else if cpuLetter == "D" {return "Dedicated"
-	} else if cpuLetter == "T" {return "Burstable"
-	} else if cpuLetter == "B" {return "General"
-	} else {return ""}
+	if cpuLetter == "A" {
+		return "Availability"
+	} else if cpuLetter == "D" {
+		return "Dedicated"
+	} else if cpuLetter == "T" {
+		return "Burstable"
+	} else if cpuLetter == "B" {
+		return "General"
+	} else {
+		return ""
+	}
 }
 
 func getInteractiveFlagValue_Ram(reader *bufio.Reader, defaultRam string, cpu string) string {
@@ -92,12 +100,20 @@ func getInteractiveFlagValue_Ram(reader *bufio.Reader, defaultRam string, cpu st
 	}
 	ok := false
 	selectedRam := ""
-	for ! ok {
+	for !ok {
 		fmt.Printf("Enter a RAM value from the list (default=%s): ", defaultRam)
 		selectedRam = readInput(reader)
-		if selectedRam == "" {selectedRam = defaultRam}
-		for _, ram := range rams {if ram == cast.ToFloat64(selectedRam) {ok = true}}
-		if ! ok {fmt.Printf("Invalid RAM value\n")}
+		if selectedRam == "" {
+			selectedRam = defaultRam
+		}
+		for _, ram := range rams {
+			if ram == cast.ToFloat64(selectedRam) {
+				ok = true
+			}
+		}
+		if !ok {
+			fmt.Printf("Invalid RAM value\n")
+		}
 	}
 	return selectedRam
 }
@@ -110,7 +126,10 @@ func getInteractiveFlagValue_Cpu(reader *bufio.Reader, defaultCpu string) string
 		if rootlistkey == "cpu" {
 			for _, itemvalue := range rootitem.([]interface{}) {
 				letter := getCpuLetter(itemvalue.(string))
-				if letter == "" {fmt.Printf("Invalid CPU: %s\n", itemvalue.(string));os.Exit(exitCodeUnexpected)}
+				if letter == "" {
+					fmt.Printf("Invalid CPU: %s\n", itemvalue.(string))
+					os.Exit(exitCodeUnexpected)
+				}
 				cpus[letter] = append(cpus[letter], itemvalue.(string))
 			}
 			break
@@ -124,7 +143,10 @@ func getInteractiveFlagValue_Cpu(reader *bufio.Reader, defaultCpu string) string
 	sort.Strings(letters)
 	for _, letter := range letters {
 		category := getCpuLetterCategory(letter)
-		if category == "" {fmt.Printf("Invalid CPU type: %s\n", letter); os.Exit(exitCodeUnexpected)}
+		if category == "" {
+			fmt.Printf("Invalid CPU type: %s\n", letter)
+			os.Exit(exitCodeUnexpected)
+		}
 		fmt.Printf("%s: %s\n", letter, category)
 	}
 	var defaultLetter string
@@ -141,24 +163,48 @@ func getInteractiveFlagValue_Cpu(reader *bufio.Reader, defaultCpu string) string
 	}
 	ok := false
 	selectedLetter := ""
-	for ! ok {
+	for !ok {
 		fmt.Printf("Enter a CPU type from the list (default=%s): ", defaultLetter)
 		selectedLetter = readInput(reader)
-		if selectedLetter == "" {selectedLetter = defaultLetter}
-		for _, letter := range letters {if letter == selectedLetter {ok = true}}
-		if ! ok {fmt.Printf("Invalid CPU type\n")}
+		if selectedLetter == "" {
+			selectedLetter = defaultLetter
+		}
+		for _, letter := range letters {
+			if letter == selectedLetter {
+				ok = true
+			}
+		}
+		if !ok {
+			fmt.Printf("Invalid CPU type\n")
+		}
 	}
 	fmt.Printf("\n")
-	for _, cpu := range cpus[selectedLetter] {if len(cpu) < 3 {fmt.Printf("%s\n", strings.TrimSuffix(cpu, selectedLetter))}}
-	for _, cpu := range cpus[selectedLetter] {if len(cpu) >= 3 {fmt.Printf("%s\n", strings.TrimSuffix(cpu, selectedLetter))}}
+	for _, cpu := range cpus[selectedLetter] {
+		if len(cpu) < 3 {
+			fmt.Printf("%s\n", strings.TrimSuffix(cpu, selectedLetter))
+		}
+	}
+	for _, cpu := range cpus[selectedLetter] {
+		if len(cpu) >= 3 {
+			fmt.Printf("%s\n", strings.TrimSuffix(cpu, selectedLetter))
+		}
+	}
 	ok = false
 	selectedCpuCores := ""
-	for ! ok {
+	for !ok {
 		fmt.Printf("Enter the number of CPU cores from the list (default=%s): ", defaultCpuCores)
 		selectedCpuCores = readInput(reader)
-		if selectedCpuCores == "" {selectedCpuCores = defaultCpuCores}
-		for _, cpu := range cpus[selectedLetter] {if cpu == selectedCpuCores + selectedLetter {ok = true}}
-		if ! ok {fmt.Printf("Invalid CPU cores\n")}
+		if selectedCpuCores == "" {
+			selectedCpuCores = defaultCpuCores
+		}
+		for _, cpu := range cpus[selectedLetter] {
+			if cpu == selectedCpuCores+selectedLetter {
+				ok = true
+			}
+		}
+		if !ok {
+			fmt.Printf("Invalid CPU cores\n")
+		}
 	}
 	return selectedCpuCores + selectedLetter
 }
@@ -189,17 +235,19 @@ func getInteractiveFlagValue_Networks(reader *bufio.Reader, datacenter string) s
 	for _, netname := range netnames {
 		fmt.Printf("%s\n", netname)
 	}
-	fmt.Printf("You can sssign up to 4 network interfaces from above network names\n")
+	fmt.Printf("You can assign up to 4 network interfaces from above network names\n")
 	var selectedNetworks []string
 	for netId, netNum := range []int{1, 2, 3, 4} {
 		var selectedNetName string
 		var selectedNetIp string
 		ok := false
-		for ! ok {
+		for !ok {
 			if netId == 0 {
 				fmt.Printf("Network 1 name (default=wan): ")
 				selectedNetName = readInput(reader)
-				if selectedNetName == "" {selectedNetName = "wan"}
+				if selectedNetName == "" {
+					selectedNetName = "wan"
+				}
 			} else {
 				fmt.Printf("Network %d name (leave empty to stop adding networks): ", netNum)
 				selectedNetName = readInput(reader)
@@ -207,17 +255,27 @@ func getInteractiveFlagValue_Networks(reader *bufio.Reader, datacenter string) s
 			if selectedNetName == "" {
 				break
 			} else {
-				for _, netname := range netnames {if cast.ToString(selectedNetName) == netname {ok = true}}
-				if ! ok {fmt.Printf("Invalid network name, choose from the list\n")}
+				for _, netname := range netnames {
+					if cast.ToString(selectedNetName) == netname {
+						ok = true
+					}
+				}
+				if !ok {
+					fmt.Printf("Invalid network name, choose from the list\n")
+				}
 			}
 		}
-		if selectedNetName == "" {break}
+		if selectedNetName == "" {
+			break
+		}
 		if selectedNetName == "wan" {
 			selectedNetIp = "auto"
 		} else {
 			fmt.Printf("Enter the network interface IP (leave empty for auto): ")
 			selectedNetIp = readInput(reader)
-			if selectedNetIp == "" {selectedNetIp = "auto"}
+			if selectedNetIp == "" {
+				selectedNetIp = "auto"
+			}
 		}
 		selectedNetworks = append(selectedNetworks, fmt.Sprintf("id=%d,name=%s,ip=%s", netId, selectedNetName, selectedNetIp))
 	}
@@ -246,11 +304,13 @@ func getInteractiveFlagValue_Disk(reader *bufio.Reader) string {
 	for diskId, diskNum := range []int{1, 2, 3, 4} {
 		var size string
 		ok := false
-		for ! ok {
+		for !ok {
 			if diskId == 0 {
 				fmt.Printf("Disk 1 GB size (default=20): ")
 				size = readInput(reader)
-				if size == "" {size = "20"}
+				if size == "" {
+					size = "20"
+				}
 			} else {
 				fmt.Printf("Disk %d GB size (leave empty to stop adding disks): ", diskNum)
 				size = readInput(reader)
@@ -258,18 +318,26 @@ func getInteractiveFlagValue_Disk(reader *bufio.Reader) string {
 			if size == "" {
 				break
 			} else {
-				for _, diskSize := range diskSizes {if cast.ToString(diskSize) == size {ok = true}}
-				if ! ok {fmt.Printf("Invalid size, choose from the list\n")}
+				for _, diskSize := range diskSizes {
+					if cast.ToString(diskSize) == size {
+						ok = true
+					}
+				}
+				if !ok {
+					fmt.Printf("Invalid size, choose from the list\n")
+				}
 			}
 		}
-		if size == "" {break}
+		if size == "" {
+			break
+		}
 		selectedSizes = append(selectedSizes, fmt.Sprintf("id=%d,size=%s", diskId, size))
 	}
 	return strings.Join(selectedSizes, " ")
 }
 
 func getInteractiveFlagValue_Traffic(reader *bufio.Reader, datacenter string) string {
-	respString := getListOfListsRespString("", false, "/svc?path=serverCreate/datacenterConfiguration/" + datacenter)
+	respString := getListOfListsRespString("", false, "/svc?path=serverCreate/datacenterConfiguration/"+datacenter)
 	rootitems := jsonUnmarshalItemsList(respString)
 	var trafficPackageOptions []string
 	defaultTrafficPackage := ""
@@ -337,10 +405,18 @@ func getInteractiveFlagValue_Image(reader *bufio.Reader, datacenter string) stri
 	for selectedCategory == "" {
 		fmt.Printf("Enter an image type: ")
 		selectedCategory = readInput(reader)
-		if selectedCategory == "" {continue}
+		if selectedCategory == "" {
+			continue
+		}
 		ok := false
-		for _, category := range categories {if selectedCategory == category {ok = true}}
-		if ok {break}
+		for _, category := range categories {
+			if selectedCategory == category {
+				ok = true
+			}
+		}
+		if ok {
+			break
+		}
 		fmt.Printf("Invalid image type\n")
 		selectedCategory = ""
 	}
@@ -352,14 +428,18 @@ func getInteractiveFlagValue_Image(reader *bufio.Reader, datacenter string) stri
 	for selectedImage == "" {
 		fmt.Printf("Enter an image: ")
 		selectedImage = readInput(reader)
-		if selectedImage == "" {continue}
+		if selectedImage == "" {
+			continue
+		}
 		ok := false
 		for _, image := range root_images[selectedCategory] {
 			if selectedImage == image {
 				ok = true
 			}
 		}
-		if ok {break}
+		if ok {
+			break
+		}
 		fmt.Printf("Invalid image\n")
 		selectedImage = ""
 	}
@@ -402,14 +482,14 @@ func getInteractiveFlagValue(flag SchemaCommandFlag, reader *bufio.Reader, datac
 			return getInteractiveFlagValue(flag, reader, datacenter, cpu)
 		}
 		if flag.ValidateRegex != "" {
-			if matched, err := regexp.MatchString("^" + flag.ValidateRegex + "$", text); err != nil || ! matched {
+			if matched, err := regexp.MatchString("^"+flag.ValidateRegex+"$", text); err != nil || !matched {
 				fmt.Printf("%s must match regular expression: '%s'\n", getInteractiveFlagLongName(flag), flag.ValidateRegex)
 				return getInteractiveFlagValue(flag, reader, datacenter, cpu)
 			}
 		}
 		if flag.ValidatePassword {
 			for _, pattern := range []string{"a-z", "A-Z", "0-9"} {
-				if matched, err := regexp.MatchString(fmt.Sprintf("[%s]", pattern), text); err != nil || ! matched {
+				if matched, err := regexp.MatchString(fmt.Sprintf("[%s]", pattern), text); err != nil || !matched {
 					fmt.Printf("%s must contain at least one character in range [%s]", getInteractiveFlagLongName(flag), pattern)
 					return getInteractiveFlagValue(flag, reader, datacenter, cpu)
 				}
@@ -421,13 +501,13 @@ func getInteractiveFlagValue(flag SchemaCommandFlag, reader *bufio.Reader, datac
 				return getInteractiveFlagValue(flag, reader, datacenter, cpu)
 			}
 		}
-		if flag.ValidateIntegerMin != 0  && text != "" {
+		if flag.ValidateIntegerMin != 0 && text != "" {
 			if num, err := strconv.Atoi(text); err != nil || num < flag.ValidateIntegerMin {
 				fmt.Printf("%s must be at least %d. ", getInteractiveFlagLongName(flag), flag.ValidateIntegerMin)
 				return getInteractiveFlagValue(flag, reader, datacenter, cpu)
 			}
 		}
-		if flag.ValidateIntegerMax != 0  && text != "" {
+		if flag.ValidateIntegerMax != 0 && text != "" {
 			if num, err := strconv.Atoi(text); err != nil || num > flag.ValidateIntegerMax {
 				fmt.Printf("%s must be less then or equal to %d. ", getInteractiveFlagLongName(flag), flag.ValidateIntegerMax)
 				return getInteractiveFlagValue(flag, reader, datacenter, cpu)
@@ -440,7 +520,7 @@ func getInteractiveFlagValue(flag SchemaCommandFlag, reader *bufio.Reader, datac
 					ok = true
 				}
 			}
-			if ! ok {
+			if !ok {
 				fmt.Printf("Invalid value for %s. ", getInteractiveFlagLongName(flag))
 				return getInteractiveFlagValue(flag, reader, datacenter, cpu)
 			}
@@ -457,7 +537,9 @@ func commandRunPostInteractive(cmd *cobra.Command, command SchemaCommand) {
 	datacenter := ""
 	cpu := ""
 	for _, flag := range command.Flags {
-		if flag.Name == "interactive" {continue}
+		if flag.Name == "interactive" {
+			continue
+		}
 		if flag.Name == "wait" {
 			_ = cmd.Flags().Set("wait", "1")
 			continue
