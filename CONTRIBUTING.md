@@ -36,6 +36,11 @@ Run the executable (From Linux):
 ./cloudcli
 ```
 
+Building for other architectures - for each architecture start a build environment, then run build as before, for example:
+
+```
+GOOS=windows bin/build.sh start_build_environment
+```
 
 ## Running the tests suite
 

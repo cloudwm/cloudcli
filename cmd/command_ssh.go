@@ -3,12 +3,13 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/moby/term"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -88,6 +89,30 @@ func setServerSshKey(serverPassword string, serverIp string, publicKey string) b
 	return true
 }
 
+func startSSHSession(session *ssh.Session) error {
+	var width, height int
+	if runtime.GOOS == "windows" {
+		width, height = 80, 40
+	} else {
+		winsize, err := term.GetWinsize(os.Stdin.Fd())
+		if err != nil {
+			return fmt.Errorf("failed to get terminal size: %v", err)
+		}
+		width, height = int(winsize.Width), int(winsize.Height)
+	}
+	modes := ssh.TerminalModes{ssh.ECHO: 0}
+	if err := session.RequestPty("xterm", width, height, modes); err != nil {
+		return fmt.Errorf("request for pseudo terminal failed: %v", err)
+	}
+	session.Stdout = os.Stdout
+	session.Stderr = os.Stderr
+	session.Stdin = os.Stdin
+	if err := session.Shell(); err != nil {
+		return fmt.Errorf("failed to start shell: %v", err)
+	}
+	return session.Wait()
+}
+
 func commandRunSsh(cmd *cobra.Command, command SchemaCommand, serversInfoBody []byte, publicKey string) {
 	sshPassword, _ := cmd.Flags().GetString("password")
 	sshPrivateKey, _ := cmd.Flags().GetString("key")
@@ -98,7 +123,7 @@ func commandRunSsh(cmd *cobra.Command, command SchemaCommand, serversInfoBody []
 		fmt.Println("Must set either --password or --key")
 		os.Exit(exitCodeInvalidFlags)
 	}
-	var serversSshInfo []ServersSshInfo;
+	var serversSshInfo []ServersSshInfo
 	if err := json.Unmarshal(serversInfoBody, &serversSshInfo); err != nil {
 		fmt.Println(string(serversInfoBody))
 		fmt.Println("Failed to parse response")
@@ -149,40 +174,16 @@ func commandRunSsh(cmd *cobra.Command, command SchemaCommand, serversInfoBody []
 		}
 		defer session.Close()
 
-		session.Stdout = os.Stdout
-		session.Stderr = os.Stderr
-
 		if publicKey == "" {
-			session.Stdin = os.Stdin
-
-			modes := ssh.TerminalModes{
-				ssh.ECHO: 0, // disable echoing
-			}
-
-			width, height, err := terminal.GetSize(int(os.Stdin.Fd()))
-
-			if err != nil {
-				fmt.Printf("Failed to initiate a terminal: %s\n", err)
-				os.Exit(exitCodeUnexpected)
-			}
-
-			if err := session.RequestPty("xterm", width, height, modes); err != nil {
-				fmt.Printf("request for pseudo terminal failed: %s", err)
-				os.Exit(exitCodeUnexpected)
-			}
-
-			if err := session.Shell(); err != nil {
-				fmt.Printf("failed to start shell: %s", err)
-				os.Exit(exitCodeUnexpected)
-			}
-
-			if err = session.Wait(); err != nil {
+			if err = startSSHSession(session); err != nil {
 				fmt.Printf("%s\n", err)
 				os.Exit(exitCodeUnexpected)
 			} else {
 				os.Exit(0)
 			}
 		} else {
+			session.Stdout = os.Stdout
+			session.Stderr = os.Stderr
 			publicKeyBytes, err := ioutil.ReadFile(publicKey)
 			if err != nil {
 				fmt.Printf("Failed to ready public key file\n")

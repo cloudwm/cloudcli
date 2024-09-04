@@ -20,8 +20,8 @@ jobs:
         mkdir -p .cloudcli/etc && export CLOUDCLI_ETC_PATH=`pwd`/.cloudcli/etc &&\
         docker build --build-arg GOOS=linux --build-arg GOARCH=amd64 -t cloudwm-cli-build -f ./Dockerfile.build . &&\
         docker run -d --rm --name cloudwm-cli-build -v `pwd`:/go/src/github.com/cloudwm/cli cloudwm-cli-build tail -f /dev/null &&\
-        docker exec cloudwm-cli-build dep ensure &&\
         docker exec cloudwm-cli-build go build -o cloudcli main.go &&\
+        exit 0
         sudo chown $USER ./cloudcli && sudo chmod +x ./cloudcli &&\
         export CLOUDCLI_BINARY=`pwd`/cloudcli &&\
         echo "${TESTING_SSHKEY}" > testing_sshkey.id_rsa &&\

@@ -3,8 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty"
 	"github.com/spf13/cobra"
+	"gopkg.in/resty.v1"
 	"gopkg.in/yaml.v2"
 	"net/url"
 	"os"
@@ -16,12 +16,12 @@ import (
 
 func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_body []byte, command SchemaCommand, noExit bool, cmd *cobra.Command) []interface{} {
 	var items []interface{}
-	if outputFormat == "json" && ! returnItems {
+	if outputFormat == "json" && !returnItems {
 		fmt.Println(string(resp_body))
-		if ! noExit {
+		if !noExit {
 			os.Exit(0)
 		}
-	} else if outputFormat == "yaml" && ! returnItems {
+	} else if outputFormat == "yaml" && !returnItems {
 		if err := json.Unmarshal(resp_body, &items); err != nil {
 			command_id, err := strconv.Atoi(string(resp_body))
 			if err == nil {
@@ -37,7 +37,7 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 			os.Exit(exitCodeInvalidResponse)
 		} else {
 			fmt.Println(string(d))
-			if ! noExit {
+			if !noExit {
 				os.Exit(0)
 			}
 		}
@@ -46,19 +46,19 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 			command_id, err := strconv.Atoi(string(resp_body))
 			if err == nil {
 				fmt.Println("Successfully queued command. Command ID:", command_id)
-				waitForCommandIds(cmd, command, []string{strconv.Itoa(command_id)}, getCommandOutputFormat("", command, "human"), false);
+				waitForCommandIds(cmd, command, []string{strconv.Itoa(command_id)}, getCommandOutputFormat("", command, "human"), false)
 				os.Exit(0)
 			} else {
 				fmt.Println(string(resp_body))
 				os.Exit(exitCodeInvalidResponse)
 			}
 		}
-		if ! returnItems {
-			var outputItems []map[string]string;
+		if !returnItems {
+			var outputItems []map[string]string
 			if command.Run.ParseStatisticsResponse {
-				var metric string;
-				var value string;
-				var timestamp int64;
+				var metric string
+				var value string
+				var timestamp int64
 				for _, response := range items {
 					for _, subResponse := range response.([]interface{}) {
 						seriesResponse := subResponse.(map[string]interface{})
@@ -90,7 +90,7 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 					for _, item := range outputItems {
 						for _, v := range item {
 							fmt.Println(v)
-							if ! noExit {
+							if !noExit {
 								os.Exit(0)
 							}
 						}
@@ -103,7 +103,7 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 			)
 			var header []string
 			for _, field := range command.Run.Fields {
-				if ! field.Long && ! field.Hide {
+				if !field.Long && !field.Hide {
 					header = append(header, strings.ToUpper(field.Name))
 				}
 			}
@@ -111,14 +111,14 @@ func returnGetCommandListResponse(outputFormat string, returnItems bool, resp_bo
 			for _, outputItem := range outputItems {
 				var row []string
 				for _, field := range command.Run.Fields {
-					if ! field.Hide {
+					if !field.Hide {
 						row = append(row, outputItem[field.Name])
 					}
 				}
 				_, _ = fmt.Fprintf(w, "%s\n", strings.Join(row, "\t"))
 			}
 			_ = w.Flush()
-			if ! noExit {
+			if !noExit {
 				os.Exit(0)
 			}
 		}
@@ -131,7 +131,7 @@ func commandRunGetList(cmd *cobra.Command, command SchemaCommand, returnItems bo
 	var waitFields []SchemaCommandField
 	for _, field := range command.Run.Fields {
 		if field.Flag != "" {
-			var value string;
+			var value string
 			if field.Array {
 				var arrayValue []string
 				if cmd_flags != nil {
@@ -164,7 +164,7 @@ func commandRunGetList(cmd *cobra.Command, command SchemaCommand, returnItems bo
 				}
 			}
 			escapedValue := url.PathEscape(value)
-			if (debug) {
+			if debug {
 				fmt.Printf("\nfield %s=%s / urlpart %s=%s", field.Flag, value, field.Name, escapedValue)
 			}
 			qs = append(qs, fmt.Sprintf("%s=%s", field.Name, escapedValue))
@@ -173,12 +173,12 @@ func commandRunGetList(cmd *cobra.Command, command SchemaCommand, returnItems bo
 		}
 	}
 	outputFormat = getCommandOutputFormat(outputFormat, command, "human")
-	if len(waitFields) > 0 && ! returnItems && ! noWait {
+	if len(waitFields) > 0 && !returnItems && !noWait {
 		var waitValue bool
 		if cmd_flags != nil {
 			waitValue = cmd_flags["wait"].(bool)
 		} else {
-			waitValue, _ = cmd.Flags().GetBool("wait");
+			waitValue, _ = cmd.Flags().GetBool("wait")
 		}
 		if waitValue {
 			return commandRunGetListWaitFields(cmd, command, waitFields, cmd_flags, "human", noExit)
@@ -197,8 +197,7 @@ func commandRunGetList(cmd *cobra.Command, command SchemaCommand, returnItems bo
 	} else if resp, err := resty.R().
 		SetHeader("AuthClientId", apiClientid).
 		SetHeader("AuthSecret", apiSecret).
-		Get(get_url);
-		err != nil {
+		Get(get_url); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(exitCodeUnexpected)
 	} else if resp.StatusCode() != 200 {
@@ -213,4 +212,3 @@ func commandRunGetList(cmd *cobra.Command, command SchemaCommand, returnItems bo
 	}
 	return items
 }
-

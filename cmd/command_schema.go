@@ -3,9 +3,9 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"gopkg.in/resty.v1"
 	"io/ioutil"
 	"os"
 	"time"
@@ -14,96 +14,95 @@ import (
 var schemaFile string
 
 type SchemaCommandFieldParser struct {
-	Parser string `json:"parser"`
-	SplitString string `json:"split_string"`
-	OnlyForHumans bool `json:"only_for_humans"`
+	Parser        string `json:"parser"`
+	SplitString   string `json:"split_string"`
+	OnlyForHumans bool   `json:"only_for_humans"`
 }
 
 type SchemaCommandField struct {
-	Name string `json:"name"`
-	Flag string `json:"flag"`
-	From string `json:"from"`
-	Parsers []SchemaCommandFieldParser `json:"parsers"`
-	Long bool `json:"long"`
-	Array bool `json:"array"`
-	Bool bool `json:"bool"`
-	Number bool `json:"number"`
-	Wait string `json:"wait"`
-	WaitPrintField string `json:"waitPrintField"`
-	WaitError string `json:"waitError"`
-	Hide bool `json:"hide"`
-	FromFile bool `json:"fromFile"`
+	Name           string                     `json:"name"`
+	Flag           string                     `json:"flag"`
+	From           string                     `json:"from"`
+	Parsers        []SchemaCommandFieldParser `json:"parsers"`
+	Long           bool                       `json:"long"`
+	Array          bool                       `json:"array"`
+	Bool           bool                       `json:"bool"`
+	Number         bool                       `json:"number"`
+	Wait           string                     `json:"wait"`
+	WaitPrintField string                     `json:"waitPrintField"`
+	WaitError      string                     `json:"waitError"`
+	Hide           bool                       `json:"hide"`
+	FromFile       bool                       `json:"fromFile"`
 }
 
 type SchemaCommandFlagProcessing struct {
-	Method string `json:"method"`
-	Args interface{} `json:"args"`
+	Method string      `json:"method"`
+	Args   interface{} `json:"args"`
 }
 
 type SchemaCommandFlag struct {
-	Name string `json:"name"`
-	Usage string `json:"usage"`
-	Required bool `json:"required"`
-	Array bool `json:"array"`
-	Default string `json:"default"`
-	Bool bool `json:"bool"`
-	Processing []SchemaCommandFlagProcessing `json:"processing"`
-	ValidateRegex string `json:"validate-regex"`
-	LongName string `json:"long-name"`
-	SelectfromServeroption string `json:"selectfrom-serveroption"`
-	ValidatePassword bool `json:"validate-password"`
-	ValidateBoolean bool `json:"validate-boolean"`
-	ValidateIntegerMin int `json:"validate-integer-min"`
-	ValidateIntegerMax int `json:"validate-integer-max"`
-	ValidateValues []string `json:"validate-values"`
+	Name                   string                        `json:"name"`
+	Usage                  string                        `json:"usage"`
+	Required               bool                          `json:"required"`
+	Array                  bool                          `json:"array"`
+	Default                string                        `json:"default"`
+	Bool                   bool                          `json:"bool"`
+	Processing             []SchemaCommandFlagProcessing `json:"processing"`
+	ValidateRegex          string                        `json:"validate-regex"`
+	LongName               string                        `json:"long-name"`
+	SelectfromServeroption string                        `json:"selectfrom-serveroption"`
+	ValidatePassword       bool                          `json:"validate-password"`
+	ValidateBoolean        bool                          `json:"validate-boolean"`
+	ValidateIntegerMin     int                           `json:"validate-integer-min"`
+	ValidateIntegerMax     int                           `json:"validate-integer-max"`
+	ValidateValues         []string                      `json:"validate-values"`
 }
 
 type SchemaCommandList struct {
-	Name string `json:"name"`
-	Key string `json:"key"`
-	Type string `json:"type"`
+	Name   string               `json:"name"`
+	Key    string               `json:"key"`
+	Type   string               `json:"type"`
 	Fields []SchemaCommandField `json:"fields"`
-
 }
 
 type SchemaCommandRun struct {
-	Cmd string `json:"cmd"`
-	Path string `json:"path"`
-	Method string `json:"method"`
-	Fields []SchemaCommandField `json:"fields"`
-	Lists []SchemaCommandList `json:"lists"`
-	ServerMethod string `json:"serverMethod"`
-	ParseStatisticsResponse bool `json:"ParseStatisticsResponse"`
-	SimpleJsonServerResponse bool `json:"SimpleJsonServerResponse"`
+	Cmd                      string               `json:"cmd"`
+	Path                     string               `json:"path"`
+	Method                   string               `json:"method"`
+	Fields                   []SchemaCommandField `json:"fields"`
+	Lists                    []SchemaCommandList  `json:"lists"`
+	ServerMethod             string               `json:"serverMethod"`
+	ParseStatisticsResponse  bool                 `json:"ParseStatisticsResponse"`
+	SimpleJsonServerResponse bool                 `json:"SimpleJsonServerResponse"`
 }
 
 type SchemaCommandCliPreRunHook struct {
-	Type string `json:"type"`
+	Type  string   `json:"type"`
 	OneOf []string `json:"oneOf"`
 }
 
 type SchemaCommand struct {
-	Alpha bool `json:"alpha"`
-	Use string `json:"use"`
-	Aliases []string `json:"aliases"`
-	Short string `json:"short"`
-	Long string `json:"long"`
-	Run SchemaCommandRun `json:"run"`
-	Flags []SchemaCommandFlag `json:"flags"`
-	Commands []SchemaCommand `json:"commands"`
-	Wait bool `json:"wait"`
-	DefaultFormat string `json:"default-format"`
-	CacheFile string `json:"cache-file"`
-	DontSortFlags bool `json:"dont-sort-flags"`
-	Interactive bool `json:"interactive"`
-	CliUsage string `json:"cliUsage"`
+	Alpha          bool                         `json:"alpha"`
+	Use            string                       `json:"use"`
+	Aliases        []string                     `json:"aliases"`
+	Short          string                       `json:"short"`
+	Long           string                       `json:"long"`
+	Run            SchemaCommandRun             `json:"run"`
+	Flags          []SchemaCommandFlag          `json:"flags"`
+	Commands       []SchemaCommand              `json:"commands"`
+	Wait           bool                         `json:"wait"`
+	DefaultFormat  string                       `json:"default-format"`
+	CacheFile      string                       `json:"cache-file"`
+	DontSortFlags  bool                         `json:"dont-sort-flags"`
+	Interactive    bool                         `json:"interactive"`
+	CliUsage       string                       `json:"cliUsage"`
 	CliPreRunHooks []SchemaCommandCliPreRunHook `json:"cliPreRunHooks"`
 }
 
 type Schema struct {
-	SchemaVersion [3]int `json:"schema_version"`
-	Commands []SchemaCommand `json:"commands"`
-	SchemaGeneratedAt time.Time `json:"schema_generated_at"`
+	SchemaVersion     [3]int          `json:"schema_version"`
+	Commands          []SchemaCommand `json:"commands"`
+	SchemaGeneratedAt time.Time       `json:"schema_generated_at"`
 }
 
 func getSupportsParam() string {

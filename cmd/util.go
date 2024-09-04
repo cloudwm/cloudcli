@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty"
+	"gopkg.in/resty.v1"
 	"gopkg.in/yaml.v2"
 	"os"
 	"reflect"
@@ -17,8 +17,7 @@ func getJsonHttpResponse(path string) *resty.Response {
 	if resp, err = resty.R().
 		SetHeader("AuthClientId", apiClientid).
 		SetHeader("AuthSecret", apiSecret).
-		Get(fmt.Sprintf("%s%s", apiServer, path));
-		err != nil {
+		Get(fmt.Sprintf("%s%s", apiServer, path)); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(exitCodeUnexpected)
 	} else if resp.StatusCode() != 200 {
@@ -48,7 +47,6 @@ func yamlDumpItemsList(respString string, items map[string]interface{}) {
 	}
 }
 
-
 func parseItemString(item interface{}) string {
 	var stringItem string
 	switch typeditem := item.(type) {
@@ -58,7 +56,7 @@ func parseItemString(item interface{}) string {
 		stringItem = fmt.Sprintf("%d", typeditem)
 	case string:
 		stringItem = fmt.Sprintf("%s", typeditem)
-	case []interface {}:
+	case []interface{}:
 		var stringSubItems []string
 		for _, subitem := range typeditem {
 			stringSubItems = append(stringSubItems, parseItemString(subitem))
@@ -81,7 +79,6 @@ func parseItemString(item interface{}) string {
 	}
 	return stringItem
 }
-
 
 func getInput(title string) string {
 	reader := bufio.NewReader(os.Stdin)
