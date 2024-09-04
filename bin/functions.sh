@@ -153,10 +153,15 @@ for host in json.load(sys.stdin)['Hosts']:
   echo ip=$ip &&\
   wait_for 'scp -i $AWS_MAC_PEM_KEY_PATH -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $amd64_tar_gz ec2-user@$ip:cloudcli-amd64.tar.gz' \
     "waiting for ssh access to instance..." 5 50 &&\
-  ssh -i $AWS_MAC_PEM_KEY_PATH -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ec2-user@$ip "tar -xzvf cloudcli-amd64.tar.gz && ls -lah cloudcli gon-config.json"
   ssh -i $AWS_MAC_PEM_KEY_PATH -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ec2-user@$ip '
-    echo "cd /Users/ec2-user && /usr/local/bin/gon -log-level debug gon-config.json" | sudo su -l
+    source notary.env &&\
+    tar -xzvf cloudcli-amd64.tar.gz && ls -lah cloudcli &&\
+    codesign --sign $NOTARY_APPLICATION_ID --options runtime --timestamp --deep ./cloudcli &&\
+    zip -r cloudcli.zip ./cloudcli &&\
+    xcrun notarytool submit ./cloudcli.zip --apple-id $NOTARY_APPLICATION_ID --team-id $NOTARY_TEAM_ID --password $NOTARY_PASSWORD --wait &&\
+    xcrun stapler staple ./cloudcli &&\
+    zip -r cloudcli.zip ./cloudcli &&\
+    ls -lah cloudcli.zip
   ' &&\
-  ssh -i $AWS_MAC_PEM_KEY_PATH -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ec2-user@$ip "ls -lah cloudcli.zip" &&\
   scp -i $AWS_MAC_PEM_KEY_PATH -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ec2-user@$ip:cloudcli.zip ./cloudcli-darwin-amd64.zip
 }
