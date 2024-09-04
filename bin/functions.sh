@@ -25,8 +25,7 @@ make_build_environment() {
   fi &&\
   if [ "${CLOUDCLI_BUILD_ENVIRONMENT_SKIP_DOCKER_PUSH}" != "true" ]; then
     docker push "${docker_image}"
-  fi &&\
-  docker run --rm -v "`pwd`:/go/src/github.com/cloudwm/cli" "${docker_image}" dep ensure
+  fi
 }
 
 get_binary_ext() {
