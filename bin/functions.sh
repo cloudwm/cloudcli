@@ -124,6 +124,8 @@ wait_for() {
 }
 
 sign_mac_binaries() {
+  echo signing mac binaries does not work at the moment
+  return 0
   export amd64_tar_gz="${1}"
   # pulled Apr 18, 2022
   export aws_cli_image="amazon/aws-cli@sha256:579f6355a1f153946f73fec93955573700a2eb0b63f9ae853000830cf6bf351a"
