@@ -70,7 +70,8 @@ func commandPreRun(cmd *cobra.Command, command SchemaCommand) {
 		if hook.Type == "requireOneOf" {
 			numFlags := 0
 			for _, name := range hook.OneOf {
-				val, _ := cmd.Flags().GetString(name); if val != "" {
+				val, _ := cmd.Flags().GetString(name)
+				if val != "" {
 					numFlags += 1
 				}
 			}
@@ -89,7 +90,7 @@ func commandRun(cmd *cobra.Command, command SchemaCommand) {
 	for _, flag := range command.Flags {
 		for _, processing := range flag.Processing {
 			if processing.Method == "validateAllowedOutputFormats" {
-				if ! flag.Bool {
+				if !flag.Bool {
 					fmt.Println("Unexpected error (validate output formats requires bool flag)")
 					os.Exit(exitCodeInvalidFlags)
 				}
@@ -102,7 +103,7 @@ func commandRun(cmd *cobra.Command, command SchemaCommand) {
 							ok = true
 						}
 					}
-					if ! ok {
+					if !ok {
 						fmt.Printf("%s flag can't be used with %s format\n", flag.Name, outputFormat)
 						os.Exit(exitCodeInvalidFlags)
 					}
@@ -131,5 +132,3 @@ func commandRun(cmd *cobra.Command, command SchemaCommand) {
 		commandRunGetListOfLists(cmd, command)
 	}
 }
-
-

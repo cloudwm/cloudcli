@@ -66,14 +66,15 @@ type SchemaCommandList struct {
 }
 
 type SchemaCommandRun struct {
-	Cmd                      string               `json:"cmd"`
-	Path                     string               `json:"path"`
-	Method                   string               `json:"method"`
-	Fields                   []SchemaCommandField `json:"fields"`
-	Lists                    []SchemaCommandList  `json:"lists"`
-	ServerMethod             string               `json:"serverMethod"`
-	ParseStatisticsResponse  bool                 `json:"ParseStatisticsResponse"`
-	SimpleJsonServerResponse bool                 `json:"SimpleJsonServerResponse"`
+	Cmd                       string               `json:"cmd"`
+	Path                      string               `json:"path"`
+	Method                    string               `json:"method"`
+	Fields                    []SchemaCommandField `json:"fields"`
+	Lists                     []SchemaCommandList  `json:"lists"`
+	ServerMethod              string               `json:"serverMethod"`
+	ParseStatisticsResponse   bool                 `json:"ParseStatisticsResponse"`
+	SimpleJsonServerResponse  bool                 `json:"SimpleJsonServerResponse"`
+	ComplexJsonServerResponse bool                 `json:"ComplexJsonServerResponse"`
 }
 
 type SchemaCommandCliPreRunHook struct {

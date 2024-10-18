@@ -13,7 +13,7 @@ import (
 )
 
 type ServerIdsDryrunResponse struct {
-	Dryrun bool `json:"dryrun"`
+	Dryrun      bool     `json:"dryrun"`
 	ServerNames []string `json:"server-names"`
 }
 
@@ -54,14 +54,14 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 			}
 		}
 		escapedValue := url.QueryEscape(value)
-		if (debug) {
+		if debug {
 			fmt.Printf("field %s=%s / urlpart %s=%s\n", field.Flag, value, field.Name, escapedValue)
 		}
 		qs = append(qs, fmt.Sprintf("%s=%s", field.Name, escapedValue))
 	}
 	payload := strings.Join(qs, "&")
 	post_url := fmt.Sprintf("%s%s", apiServer, command.Run.Path)
-	if dryrun && ! hasDryrunFlag {
+	if dryrun && !hasDryrunFlag {
 		fmt.Printf("\nPOST %s\n", post_url)
 		fmt.Printf("%s\n\n", payload)
 		os.Exit(exitCodeDryrun)
@@ -97,6 +97,9 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 				}
 				commandRunSsh(cmd, command, body, publicKey)
 				os.Exit(exitCodeUnexpected)
+			} else if command.Run.ComplexJsonServerResponse {
+				fmt.Println(string(body))
+				os.Exit(0)
 			} else if command.Run.SimpleJsonServerResponse {
 				if format == "json" {
 					fmt.Println(string(body))
@@ -127,7 +130,7 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 					}
 				}
 			} else {
-				var commandIds []string;
+				var commandIds []string
 				if err := json.Unmarshal(body, &commandIds); err != nil {
 					if dryrun && hasDryrunFlag {
 						var dryrunRes ServerIdsDryrunResponse
@@ -163,11 +166,11 @@ func commandRunPost(cmd *cobra.Command, command SchemaCommand) {
 				}
 				if len(commandIds) == 0 {
 					fmt.Println("Unexpected command failure")
-					os.Exit(exitCodeUnexpected);
+					os.Exit(exitCodeUnexpected)
 				}
 				if format == "json" || format == "yaml" {
-					parsedResponse := make(map[string][]string);
-					parsedResponse["command_ids"] = commandIds;
+					parsedResponse := make(map[string][]string)
+					parsedResponse["command_ids"] = commandIds
 					var d []byte
 					var err error
 					if format == "yaml" {

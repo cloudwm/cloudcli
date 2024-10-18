@@ -38,7 +38,7 @@ it's recommended to use a configuration file with appropriate permissions and lo
 var rootCmd = &cobra.Command{
 	Use:   "cloudcli",
 	Short: "Cloudcli server management",
-	Long: getRootLongDescription(),
+	Long:  getRootLongDescription(),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		loadGlobalFlags()
 	},
@@ -47,7 +47,7 @@ var rootCmd = &cobra.Command{
 var initCommand = getInitCommand()
 
 var versionCommand = &cobra.Command{
-	Use: "version",
+	Use:   "version",
 	Short: "Get the cloudcli version",
 	Run: func(cmd *cobra.Command, args []string) {
 		var schemaVersion []string
@@ -73,7 +73,6 @@ var versionCommand = &cobra.Command{
 		}
 	},
 }
-
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
@@ -117,7 +116,7 @@ Use "{{.CommandPath}} [command] --help" for more information about a command.{{e
 	cli_cobra_subcommands = make(map[string]*cobra.Command)
 	cli_schema_subcommands = make(map[string]SchemaCommand)
 	hasSchema, cli_schema = loadSchema()
-	if ! hasSchema {
+	if !hasSchema {
 		_ = rootCmd.PersistentFlags().Parse(os.Args[1:])
 		initConfig()
 		loadGlobalFlags()
@@ -131,8 +130,8 @@ func initSubCommands() {
 	for _, command := range cli_schema.Commands {
 		var cmd = createCommandFromSchema(command)
 		for _, subcommand := range command.Commands {
-			if ! subcommand.Alpha || enableAlpha {
-				var subcmd= createCommandFromSchema(subcommand)
+			if !subcommand.Alpha || enableAlpha {
+				var subcmd = createCommandFromSchema(subcommand)
 				cmd.AddCommand(subcmd)
 				cli_cobra_subcommands[fmt.Sprintf("%s.%s", command.Use, subcommand.Use)] = cmd
 				cli_schema_subcommands[fmt.Sprintf("%s.%s", command.Use, subcommand.Use)] = subcommand
