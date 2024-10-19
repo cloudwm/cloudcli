@@ -71,3 +71,9 @@ cloudcli --help
 * [cloudcli network subnet_delete](docs/cloudcli_network_subnet_delete.md)	 - Delete a network subnet
 * [cloudcli network subnet_edit](docs/cloudcli_network_subnet_edit.md)	 - Edit a network subnet, all values which are different then existing values will be updated
 * [cloudcli network subnet_list](docs/cloudcli_network_subnet_list.md)	 - List network subnets
+
+#### Kubernetes management (BETA)
+
+* [cloudcli k8s create_cluster](docs/cloudcli_k8s_create_cluster.md)	 - Create a Kubernetes cluster (BETA)
+* [cloudcli k8s add_worker](docs/cloudcli_k8s_add_worker.md)	 - Add a Kubernetes worker node to a nodepool (BETA)
+* [cloudcli k8s status](docs/cloudcli_k8s_status.md)	 - Get Kubernetes cluster status (BETA)
